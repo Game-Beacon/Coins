@@ -1,0 +1,79 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bbb281ee3bf0b054c82ac2347e9e782c, type: 3}
+  m_Name: Packed Assets
+  m_EditorClassIdentifier: 
+  m_GroupName: Packed Assets
+  m_Data:
+    m_SerializedData: []
+  m_GUID: a77e8479ebb7eb245b3429a7ea4bec9b
+  m_SerializeEntries:
+  - m_GUID: a1b3711cee0ca6f4ca0d9d4719e67ba2
+    m_Address: Scenes/BattleScene
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    m_MainAsset: {fileID: 0}
+    m_TargetAsset: {fileID: 0}
+  - m_GUID: c85f882de269f9448b97542159382590
+    m_Address: Prefab/Card.prefab
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    m_MainAsset: {fileID: 0}
+    m_TargetAsset: {fileID: 0}
+  - m_GUID: 1f1dc217b0476ad41928e31d4ba6f443
+    m_Address: picture/frame_red.png
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    m_MainAsset: {fileID: 2800000, guid: 1f1dc217b0476ad41928e31d4ba6f443, type: 3}
+    m_TargetAsset: {fileID: 2800000, guid: 1f1dc217b0476ad41928e31d4ba6f443, type: 3}
+  - m_GUID: b8604eb586c7cf14cafc83c50819839a
+    m_Address: picture/frame_green.png
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    m_MainAsset: {fileID: 2800000, guid: b8604eb586c7cf14cafc83c50819839a, type: 3}
+    m_TargetAsset: {fileID: 2800000, guid: b8604eb586c7cf14cafc83c50819839a, type: 3}
+  - m_GUID: 603deb288ad665646b6ad9ee75015ac3
+    m_Address: picture/card_red.png
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    m_MainAsset: {fileID: 2800000, guid: 603deb288ad665646b6ad9ee75015ac3, type: 3}
+    m_TargetAsset: {fileID: 2800000, guid: 603deb288ad665646b6ad9ee75015ac3, type: 3}
+  - m_GUID: 389296803e5e3a14c80b681590d4ea80
+    m_Address: picture/stone.png
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    m_MainAsset: {fileID: 2800000, guid: 389296803e5e3a14c80b681590d4ea80, type: 3}
+    m_TargetAsset: {fileID: 2800000, guid: 389296803e5e3a14c80b681590d4ea80, type: 3}
+  - m_GUID: f3be387eb8a9f1f47a3289fbd91154fd
+    m_Address: picture/frame_yellow.png
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    m_MainAsset: {fileID: 2800000, guid: f3be387eb8a9f1f47a3289fbd91154fd, type: 3}
+    m_TargetAsset: {fileID: 2800000, guid: f3be387eb8a9f1f47a3289fbd91154fd, type: 3}
+  - m_GUID: fba3c2ee578c687458c6f01510b2bd60
+    m_Address: picture/card_green.png
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    m_MainAsset: {fileID: 2800000, guid: fba3c2ee578c687458c6f01510b2bd60, type: 3}
+    m_TargetAsset: {fileID: 2800000, guid: fba3c2ee578c687458c6f01510b2bd60, type: 3}
+  - m_GUID: f185afb01ee091d44a86b3620bb93291
+    m_Address: picture/card_yellow.png
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    m_MainAsset: {fileID: 2800000, guid: f185afb01ee091d44a86b3620bb93291, type: 3}
+    m_TargetAsset: {fileID: 2800000, guid: f185afb01ee091d44a86b3620bb93291, type: 3}
+  m_ReadOnly: 0
+  m_Settings: {fileID: 11400000, guid: 73ee212e6228b0645825250844d47e8c, type: 2}
+  m_SchemaSet:
+    m_Schemas:
+    - {fileID: 11400000, guid: 7f3f676548fa60046b29c3ec559412dd, type: 2}
+    - {fileID: 11400000, guid: 03078d6aae56b834d92cf51d0a072a1d, type: 2}
