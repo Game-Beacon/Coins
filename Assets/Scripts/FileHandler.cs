@@ -2,11 +2,20 @@ using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Xml;
+using UnityEngine;
+
 namespace Tools
 {
     public static class FileHandler
 {
-        static readonly string CardsXmlFilePath = "C:\\Users\\user\\Desktop\\TestCards.xml";
+        static string CardsXmlFilePath
+        {
+            get
+            {
+                string path= Path.Combine(Application.dataPath, "Data\\TestCards.xml");
+                return path;
+            }
+        }
         private static XmlNode ReadXmlFile(string filePath)
         {
             if (!File.Exists(filePath))

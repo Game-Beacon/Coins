@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<Cards xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+	<Card>
+		<ID>1</ID>
+		<Attribute>attack</Attribute>
+		<Cost>1</Cost>
+		<Effect1>Damage</Effect1>
+		<Count1>100</Count1>
+		<Effect2>RemoveArmor</Effect2>
+		<Count2>5</Count2>
+	</Card>
+	<Card>
+		<ID>2</ID>
+		<Attribute>order</Attribute>
+		<Cost>2</Cost>
+		<Effect1>RemoveArmor</Effect1>
+		<Count1>999</Count1>
+		<Effect2>Damage</Effect2>
+		<Count2>1</Count2>
+	</Card>
+	<Card>
+		<ID>3</ID>
+		<Attribute>talent</Attribute>
+		<Cost>1</Cost>
+		<Effect1>GainArmor</Effect1>
+		<Count1>2</Count1>
+	</Card>
+	<Card>
+		<ID>4</ID>
+		<Attribute>order</Attribute>
+		<Cost>6</Cost>
+		<Effect1>GainArmor</Effect1>
+		<Count1>5</Count1>
+	</Card>
+</Cards>
