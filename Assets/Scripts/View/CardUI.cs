@@ -1,8 +1,5 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine.UI;
 using UnityEngine;
-
 public class CardUI : MonoBehaviour
 {
     [SerializeField] private Image bg;
@@ -18,5 +15,12 @@ public class CardUI : MonoBehaviour
         content.text = card.GetContent();
         cost.text = card.Cost.ToString();
     }
+    private void OnMouseDown()
+    {
+        Debug.Log("OnMouseDown");
+        transform.position += new Vector3(0.3f,0);
+    }
+
+
 }
 

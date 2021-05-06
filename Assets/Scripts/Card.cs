@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using UniRx;
 public class Card
 {
@@ -7,7 +8,7 @@ public class Card
     public int Cost;
     public Effect Effect1;
     public Effect Effect2;
-
+    public List<Effect> effects=new List<Effect>();
     public Card(string[] xmlInfo)
     {
         int.TryParse(xmlInfo[0],out ID);
@@ -22,6 +23,8 @@ public class Card
         Effect2.action = Tool.Parse<Action>(xmlInfo[5]);
         int.TryParse(xmlInfo[4],out value);
         Effect2.value = value;
+        effects.Add(Effect1);
+        effects.Add(Effect2);
     }
     public void SetCardUI(CardUI cardUI)
     {
@@ -56,10 +59,12 @@ public class Card
         return word;
     }
 }
-public struct Effect
+public class Effect
 {
     public Action action { get; set; }
     public int value { get; set; }
+
+
 }
 
 public enum Type

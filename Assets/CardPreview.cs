@@ -19,7 +19,7 @@ public class CardPreview : MonoBehaviour
     int index=-1;
     private void DetectMouseButton(long obj)
     {
-        if (Input.GetMouseButtonDown(0))
+        if (Input.GetKeyDown(KeyCode.Z))
         {
             if (index>=cards.Count-1)
             {
@@ -27,7 +27,7 @@ public class CardPreview : MonoBehaviour
             }
             cards[++index].SetCardUI(uI);
         }
-        if (Input.GetMouseButtonDown(1))
+        if (Input.GetKeyDown(KeyCode.X))
         {
             if (index<=0)
             {

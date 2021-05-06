@@ -10,7 +10,7 @@ public static class UnityTool
         if (Root.name == GameObjectName) return Root;
         Transform Result = null;
         Transform[] _childs = Root.transform.GetComponentsInChildren<Transform>(true);
-        foreach (var child in _childs)
+        foreach (   var child in _childs)
         {
             if (child.name == GameObjectName)
             {
@@ -51,7 +51,6 @@ public static class Tool
         TEnum result = default(TEnum);
         if (string.IsNullOrEmpty(value))
         {
-            DeBugWarning($"value should not be null or empty");
             return result;
         }
         if (Enum.IsDefined(typeof(TEnum), value))
@@ -64,11 +63,6 @@ public static class Tool
         }
         return result;
     }
-    //public static int Prase(string value)
-    //{
-    //    int result;
-    //    int.TryParse(value, out result);
-    //}
     public static void DeBugWarning(string value)
     {
         UnityTool.DeBugWarning(value);
