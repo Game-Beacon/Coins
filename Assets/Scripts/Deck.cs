@@ -1,35 +1,47 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using UnityEngine;
 
 public class Deck
 {
-    public List<Card> deck { get; private set; }
-    private Queue<Card> tempDeck=new Queue<Card>();
-    public List<Card> handCards { get; private set; } = new List<Card>();
-    public void SetDeck(List<Card> deck)
+    List<Card> originDeck;
+    private Queue<Card> deckPool=new Queue<Card>();
+    public Dictionary<Guid,Card> handCards = new Dictionary<Guid, Card>();
+    public void SetOriginDeck(List<Card> deck)
     {
-        this.deck = deck;
+        originDeck = deck;
     }
 
-    public Card AddHandCard()
+    public void AddHandCard(Guid uiGuid)
     {
-        CheckCards();
-        Card temp= tempDeck.Dequeue();
-        handCards.Add(temp);
-        return temp;
+        var temp = GetNextCard();
+        handCards.Add(uiGuid,temp);
     }
-    public void RemoveHandCard(Card card)
+
+    private Card GetNextCard()
     {
-        handCards.Remove(card);
-    }
-    private void CheckCards()
-    {
-        if (tempDeck.Count == 0)
+        if (deckPool.Count == 0)
         {
-            foreach (var item in deck)
-            {
-                tempDeck.Enqueue(item);
-            }
+            ReSetDeckPool();
         }
+        return deckPool.Dequeue();
+    }
+
+    private void ReSetDeckPool()
+    {
+        foreach (var item in originDeck)
+        {
+            deckPool.Enqueue(item);
+        }
+    }
+
+    public void RemoveHandCard(Guid UiGuid)
+    {
+        handCards.Remove(UiGuid);
+    }
+
+    public Card GetCard(Guid uiID)
+    {
+        return handCards[uiID];
     }
 }

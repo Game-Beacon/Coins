@@ -1,57 +1,27 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq.Expressions;
 using UniRx;
-public class Card
-{
-    public int ID;
-    public Type type;
-    public int Cost;
-    public Effect Effect1;
-    public Effect Effect2;
-    public List<Effect> effects=new List<Effect>();
-    public Card(string[] xmlInfo)
-    {
-        int.TryParse(xmlInfo[0],out ID);
-        if (!Enum.TryParse<Type>(xmlInfo[1], out type))
-        {
-            Tool.DeBugWarning($"the cardType{xmlInfo[1]} is wrong");
-        }
-        int.TryParse(xmlInfo[2], out Cost);
-        Effect1.action = Tool.Parse<Action>(xmlInfo[3]);
-        int.TryParse(xmlInfo[4],out int value);
-        Effect1.value = value;
-        Effect2.action = Tool.Parse<Action>(xmlInfo[5]);
-        int.TryParse(xmlInfo[4],out value);
-        Effect2.value = value;
-        effects.Add(Effect1);
-        effects.Add(Effect2);
-    }
-    public void SetCardUI(CardUI cardUI)
-    {
-        CardUIInfo info= UISource.GetBG(type);
-        cardUI.SetCard(this, info);
-    }
-    public string GetContent()
-    {
-        string content= GetEffectContent(Effect1) + GetEffectContent(Effect2);
-        return content;
-    }
+using UnityEditorInternal;
+using UnityEngine.UI;
 
-    private string GetEffectContent(Effect effect)
+public static class TextHandler
+{
+    public static string GetEffectContent(IEffect effect)
     {
         string word = string.Empty;
-        switch (effect.action)
+        switch (effect.EffecID)
         {
-            case Action.none:
+            case EffecID.None:
                 break;
-            case Action.Damage:
-                word = $"對敵人造成{effect.value}點傷害";
+            case EffecID.Damage:
+                word = $"對敵人造成{effect.Value}點傷害";
                 break;
-            case Action.RemoveArmor:
-                word = $"移除敵人{effect.value}點護甲";
+            case EffecID.RemoveArmor:
+                word = $"移除敵人{effect.Value}點護甲";
                 break;
-            case Action.GainArmor:
-                word = $"獲得{effect.value}點護甲";
+            case EffecID.GainArmor:
+                word = $"獲得{effect.Value}點護甲";
                 break;
             default:
                 break;
@@ -59,12 +29,73 @@ public class Card
         return word;
     }
 }
-public class Effect
+
+public class Card
 {
-    public Action action { get; set; }
-    public int value { get; set; }
+    private int id;
+    
+    public Type type;
+    public int cost;
+    public List<IEffect> effects=new List<IEffect>();
 
+    public Card(string[] xmlInfo)
+    {
+        int index = 0;
+        int.TryParse(xmlInfo[index++],out id);
+        type = Tool.Parse<Type>(xmlInfo[index++]);
+        int.TryParse(xmlInfo[index++], out cost);
+        while (index<xmlInfo.Length-1)
+        {
+            EffecID effecID = Tool.Parse<EffecID>(xmlInfo[index++]);
+            int.TryParse(xmlInfo[index++],out int value);
+            if (effecID!=EffecID.None)
+            {
+                IEffect tempEffect = MakeEffect(effecID,value);
+                effects.Add(tempEffect);
+            }
+        }
+    }
 
+    private IEffect MakeEffect(EffecID effecID, int result)
+    {
+        IEffect effect=null;
+        switch (effecID)
+        {
+            case EffecID.Damage:
+                effect = new Damage{Value = result};
+                break;
+            case  EffecID.GainArmor:
+                effect = new GainArmor{Value = result};
+                break;
+            case  EffecID.RemoveArmor :
+                effect = new RemoveArmor{Value = result};
+                break;
+            default:
+                Tool.DeBugWarning($"{effecID} is not implemented");
+                break;
+        }
+
+        return effect;
+    }
+
+    public string GetContent()
+    {
+        string content=String.Empty;
+        foreach (var effect in effects)
+        {
+            content += TextHandler.GetEffectContent(effect);
+        }
+
+        return content;
+    }
+
+    public void DoAction(Character target)
+    {
+        foreach (var effect in effects)
+        {
+            effect.DoAction(target);
+        }
+    }
 }
 
 public enum Type
@@ -74,11 +105,5 @@ public enum Type
     order,
     talent,
 }
-public enum Action
-{
-    none = 0,
-    Damage,
-    RemoveArmor,
-    GainArmor
-}
+
 

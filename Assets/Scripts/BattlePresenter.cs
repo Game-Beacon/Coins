@@ -16,7 +16,6 @@ public class BattlePresenter: MonoBehaviour
 
     private void Awake()
     {
-        BattleSystem.SETHandCardsUI(cardsUI);
         BattleSystem.Player.SubscribeHP(playerStatus.SetHp);
         BattleSystem.Player.SubscribeEP(playerStatus.SetEneragy);
         BattleSystem.Enemy.SubscribeHP(enemyStatus.SetHp);

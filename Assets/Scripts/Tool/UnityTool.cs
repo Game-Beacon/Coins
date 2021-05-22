@@ -42,6 +42,11 @@ public static class UnityTool
     {
         Debug.LogError(value);
     }
+
+    public static void DeBug(string value)
+    {
+        Debug.Log(value);
+    }
 }
 
 public static class Tool
@@ -68,4 +73,8 @@ public static class Tool
         UnityTool.DeBugWarning(value);
     }
 
+    public static void DeBug(string inputString)
+    {
+        UnityTool.DeBug(inputString);
+    }
 }

@@ -10,33 +10,12 @@ public class CardPreview : MonoBehaviour
     List<Card> cards;
     void Awake()
     {
-        UISource.intialize();
-        CardSource.Intialize();
-        cards=CardSource.cards;
-        inputUnirx = Observable.EveryUpdate()
-            .Subscribe(DetectMouseButton);
+        UISource.Intialize();
+        CardInfoSource.Intialize();
+        cards=CardInfoSource.cards;
     }
     int index=-1;
-    private void DetectMouseButton(long obj)
-    {
-        if (Input.GetKeyDown(KeyCode.Z))
-        {
-            if (index>=cards.Count-1)
-            {
-                index = -1;
-            }
-            cards[++index].SetCardUI(uI);
-        }
-        if (Input.GetKeyDown(KeyCode.X))
-        {
-            if (index<=0)
-            {
-                index = cards.Count;
-            }
-            cards[--index].SetCardUI(uI);
-        }
-
-    }
+    
     private void OnDestroy()
     {
         inputUnirx.Dispose();

@@ -13,7 +13,7 @@ public class CardUI : MonoBehaviour
         frame.sprite = info.card;
         captain.text = card.type.ToString();
         content.text = card.GetContent();
-        cost.text = card.Cost.ToString();
+        cost.text = card.cost.ToString();
     }
     private void OnMouseDown()
     {
