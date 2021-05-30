@@ -1,14 +1,14 @@
 using System;
 using System.Collections;
+using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using UnityEngine;
 using UnityEngine.AddressableAssets;
+using UnityEngine.ResourceManagement.AsyncOperations;
 
 public static class UISource
 {
-    private static CardUIInfo attack;
-    private static CardUIInfo talent;
-    private static CardUIInfo order;
+    private static Dictionary<Type, CardUIInfo> cardUIInfos = new Dictionary<Type, CardUIInfo>();
     public static bool isLoading { get;private set; }
 
     private static int _loadingCount;
@@ -30,60 +30,43 @@ public static class UISource
         if (loadingCount>0)
         {
             isLoading = true;
+            Debug.Log("Loading");
         }
         else
         {
             isLoading = false;
+            Debug.Log("LoadingComplete");
         }
     }
 
     public static void Intialize()
     {
-        LoadAddressable<Sprite>("picture/card_red.png",attack.bg);
-        LoadAddressable<Sprite>("picture/card_green.png",talent.bg);
-        LoadAddressable<Sprite>("picture/card_yellow.png",order.bg);
-        LoadAddressable<Sprite>("picture/frame_yellow.png",order.card);
-        LoadAddressable<Sprite>("picture/frame_green.png",talent.card);
-        LoadAddressable<Sprite>("picture/frame_red.png",attack.card);
-        // Addressables.LoadAssetAsync<Sprite>("picture/card_red.png").Completed += (i) => { attack.bg= i.Result; };
-        // Addressables.LoadAssetAsync<Sprite>("picture/card_green.png").Completed += (i) => { talent.bg = i.Result; };
-        // Addressables.LoadAssetAsync<Sprite>("picture/card_yellow.png").Completed += (i) => { order.bg = i.Result; };
-        // Addressables.LoadAssetAsync<Sprite>("picture/frame_yellow.png").Completed += (i) => { order.card= i.Result; };
-        // Addressables.LoadAssetAsync<Sprite>("picture/frame_green.png").Completed += (i) => { talent.card= i.Result; };
-        // Addressables.LoadAssetAsync<Sprite>("picture/frame_red.png").Completed += (i) => { attack.card = i.Result; };
+        LoadAddressable<CardData>("Data/CardData.asset",SetCardData);
     }
     
-    public  static void LoadAddressable<T>(string address,T ob)
+    public  static void LoadAddressable<T>(string address,Action<T> action)
     {
         loadingCount++;
-        Addressables.LoadAssetAsync<T>(address).Completed += (i) => { ob= i.Result; loadingCount--;};
-    }
-    
-    
-    public static CardUIInfo GetBG(Type type)
-    {
-        CardUIInfo cardUIInfo=new CardUIInfo();
-        switch (type)
+        Addressables.LoadAssetAsync<T>(address).Completed += (i) =>
         {
-            case Type.attack:
-                cardUIInfo= attack;
-                break;
-            case Type.order:
-                cardUIInfo= order;
-                break;
-            case Type.talent:
-                cardUIInfo=talent;
-                break;
-            default:
-                Tool.DeBugWarning("wrong type");
-                break;
-        }
-        return cardUIInfo;
+            action(i.Result);
+            loadingCount--;
+        };
     }
-}
 
-public struct CardUIInfo
-{
-    public Sprite bg;
-    public Sprite card;
+    static void SetCardData(CardData cardData)
+    {
+        foreach (var VARIABLE in cardData.cardUIInfos)
+        {
+            if (!cardUIInfos.ContainsKey(VARIABLE.type))
+            {
+                cardUIInfos.Add(VARIABLE.type,VARIABLE);
+            }
+        }
+    }
+
+    public static CardUIInfo GetUIInfo(Type type)
+    {
+        return cardUIInfos[type];
+    }
 }

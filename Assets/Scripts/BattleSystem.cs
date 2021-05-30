@@ -11,9 +11,13 @@ public static class BattleSystem
     public static Character Enemy { get;  private set;}
     public static Deck enemyDeck;
     public static Dictionary<int, Guid> HandCards = new Dictionary<int, Guid>();
-    private static HandCardsUI handCardsUI;
     public static bool yourTurn=false;
-    private static Action TurnAction=()=>{};
+    private static CardsUI handCardsUI;
+
+    public static void SethandCardsUI(CardsUI cardUI)
+    {
+        handCardsUI = cardUI;
+    }
     public static void Intialize()
     {
         List<Card> deck=CardInfoSource.cards;
@@ -24,99 +28,49 @@ public static class BattleSystem
         enemyDeck = new Deck();
         enemyDeck.SetOriginDeck(deck);
     }
-    public static void SETHandCardsUI(HandCardsUI cardsUI)
+    public static void AddHandCards(int count)
     {
-        handCardsUI = cardsUI;
-    }
-
-    public static void AddHandCards(int amount)
-    {
-        for (int i = 0; i < amount; i++)
+        for (int i = 0; i < count; i++)
         {
-            playerDeck.AddHandCard(Guid.NewGuid());
-        }
-    }
-    public static void ShowHandCards()
-    {
-        Tool.DeBug("Here is your HandCard");
-        HandCards.Clear();
-        var test = playerDeck.handCards.GetEnumerator();
-        int i = 0;
-        while (test.MoveNext())
-        {
-            var value = test.Current;
-            HandCards.Add(i,value.Key);
-            Tool.DeBug($"第{value.Key}張牌 :{value.Value.GetContent()}");
-            i++;
+            var guid = Guid.NewGuid();
+            var card= playerDeck.AddHandCard(guid);
+            int id= handCardsUI.SetCardAndReturnUniqueID(card,UISource.GetUIInfo(card.type));
+            HandCards.Add(id,guid);
         }
     }
 
-    public static void TryUseCard(Guid uiID,Character user,Character target)
+    public static bool PlayerUseCard(int uiID)
     {
-        Card card= playerDeck.GetCard(uiID);
-        if (user.Ep<card.cost)
+        return TryUseCard(uiID,BattleSystem.Player,BattleSystem.Enemy);
+    }
+    private static bool TryUseCard(int uiID,Character user,Character target)
+    {
+        var guid= HandCards[uiID];
+        Card card= playerDeck.GetCard(guid);
+        if (card==null|| user.Ep<card.cost)
         {
-            Tool.DeBug($"Your Energy is not enough to use Card{card.GetContent()}");
-            return;
+            return false;
         }
-        Tool.DeBug(card.GetContent());
         card.DoAction(target);
+        HandCards.Remove(uiID);
+        return true;
     }
 
 
     public static void GameStart()
     {
-        
         Tool.DeBug("GameStart");
         AddHandCards(1);
-        ShowHandCards();
-
         
-        Observable.EveryUpdate()
-            .Subscribe(DetectInput);
     }
 
-    static void DetectInput(long i)
-    {
-        if (Input.GetKeyDown(KeyCode.Escape))
-        {
-            EndTurn();
-            return;
-        }
-        TurnAction();
-    }
 
-    static void UseCard()
+    public static void EndTurn()
     {
-        
-        int card = -1;
-        string s = Input.inputString;
-        if (int.TryParse(s,out int num))
+        yourTurn=!yourTurn ;
+        if (yourTurn)
         {
-            card = num;
-        }
-
-        if (card>=0)
-        {
-            if (BattleSystem.HandCards.ContainsKey(card))
-            {
-                Tool.DeBug("UseCard");
-                BattleSystem.TryUseCard(BattleSystem.HandCards[card],BattleSystem.Player,BattleSystem.Enemy);
-            }
-        }
-    }
-
-    static void EndTurn()
-    {
-        BattleSystem.yourTurn=!BattleSystem.yourTurn ;
-        if (BattleSystem.yourTurn)
-        {
-            BattleSystem.ShowHandCards();
-            TurnAction = UseCard;
-        }
-        else
-        {
-            TurnAction = () => { };
+            AddHandCards(2);
         }
     }
 

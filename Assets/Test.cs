@@ -1,32 +1,15 @@
-﻿using UniRx;
+﻿using System.Collections;
+using System.Collections.Generic;
+using UniRx;
 using UnityEngine;
 
 
 public class Test : MonoBehaviour
 {
-    private bool mIsDead;
-
-    void Start()
+    public void TestDrag()
     {
-        ReactiveProperty<int> hp = new IntReactiveProperty(100);
-
-        hp.Subscribe(Next,Complete);
-
-        Observable.EveryUpdate().Subscribe(_ =>
-        {
-            if (mIsDead == false) hp.Value -= 1;
-        });
+        transform.position = Input.mousePosition;
     }
-
-    void Next(int hp)
-    {
-        mIsDead = hp < 1;
-        Debug.LogFormat("isDead:{0}", mIsDead);
-    }
-    void Complete()
-    {
-        Debug.LogFormat("Complete");
-    }
-
+    
 }
 

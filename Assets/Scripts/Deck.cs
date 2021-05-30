@@ -12,10 +12,11 @@ public class Deck
         originDeck = deck;
     }
 
-    public void AddHandCard(Guid uiGuid)
+    public Card AddHandCard(Guid uiGuid)
     {
-        var temp = GetNextCard();
-        handCards.Add(uiGuid,temp);
+        var nextCard = GetNextCard();
+        handCards.Add(uiGuid,nextCard);
+        return nextCard;
     }
 
     private Card GetNextCard()

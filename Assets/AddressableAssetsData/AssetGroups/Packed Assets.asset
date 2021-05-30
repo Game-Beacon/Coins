@@ -29,48 +29,12 @@ MonoBehaviour:
     m_SerializedLabels: []
     m_MainAsset: {fileID: 0}
     m_TargetAsset: {fileID: 0}
-  - m_GUID: 1f1dc217b0476ad41928e31d4ba6f443
-    m_Address: picture/frame_red.png
+  - m_GUID: c66c114ad23cfa747a9e77732ec6e5e3
+    m_Address: Data/CardData.asset
     m_ReadOnly: 0
     m_SerializedLabels: []
-    m_MainAsset: {fileID: 2800000, guid: 1f1dc217b0476ad41928e31d4ba6f443, type: 3}
-    m_TargetAsset: {fileID: 2800000, guid: 1f1dc217b0476ad41928e31d4ba6f443, type: 3}
-  - m_GUID: b8604eb586c7cf14cafc83c50819839a
-    m_Address: picture/frame_green.png
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    m_MainAsset: {fileID: 2800000, guid: b8604eb586c7cf14cafc83c50819839a, type: 3}
-    m_TargetAsset: {fileID: 2800000, guid: b8604eb586c7cf14cafc83c50819839a, type: 3}
-  - m_GUID: 603deb288ad665646b6ad9ee75015ac3
-    m_Address: picture/card_red.png
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    m_MainAsset: {fileID: 2800000, guid: 603deb288ad665646b6ad9ee75015ac3, type: 3}
-    m_TargetAsset: {fileID: 2800000, guid: 603deb288ad665646b6ad9ee75015ac3, type: 3}
-  - m_GUID: 389296803e5e3a14c80b681590d4ea80
-    m_Address: picture/stone.png
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    m_MainAsset: {fileID: 2800000, guid: 389296803e5e3a14c80b681590d4ea80, type: 3}
-    m_TargetAsset: {fileID: 2800000, guid: 389296803e5e3a14c80b681590d4ea80, type: 3}
-  - m_GUID: f3be387eb8a9f1f47a3289fbd91154fd
-    m_Address: picture/frame_yellow.png
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    m_MainAsset: {fileID: 2800000, guid: f3be387eb8a9f1f47a3289fbd91154fd, type: 3}
-    m_TargetAsset: {fileID: 2800000, guid: f3be387eb8a9f1f47a3289fbd91154fd, type: 3}
-  - m_GUID: fba3c2ee578c687458c6f01510b2bd60
-    m_Address: picture/card_green.png
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    m_MainAsset: {fileID: 2800000, guid: fba3c2ee578c687458c6f01510b2bd60, type: 3}
-    m_TargetAsset: {fileID: 2800000, guid: fba3c2ee578c687458c6f01510b2bd60, type: 3}
-  - m_GUID: f185afb01ee091d44a86b3620bb93291
-    m_Address: picture/card_yellow.png
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    m_MainAsset: {fileID: 2800000, guid: f185afb01ee091d44a86b3620bb93291, type: 3}
-    m_TargetAsset: {fileID: 2800000, guid: f185afb01ee091d44a86b3620bb93291, type: 3}
+    m_MainAsset: {fileID: 11400000, guid: c66c114ad23cfa747a9e77732ec6e5e3, type: 2}
+    m_TargetAsset: {fileID: 11400000, guid: c66c114ad23cfa747a9e77732ec6e5e3, type: 2}
   m_ReadOnly: 0
   m_Settings: {fileID: 11400000, guid: 73ee212e6228b0645825250844d47e8c, type: 2}
   m_SchemaSet:
