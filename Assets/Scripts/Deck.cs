@@ -7,11 +7,11 @@ public class Deck
     List<Card> originDeck;
     private Queue<Card> deckPool=new Queue<Card>();
     public Dictionary<Guid,Card> handCards = new Dictionary<Guid, Card>();
-    public void SetOriginDeck(List<Card> deck)
+
+    public Deck(List<Card> deck)
     {
         originDeck = deck;
     }
-
     public Card AddHandCard(Guid uiGuid)
     {
         var nextCard = GetNextCard();

@@ -5,7 +5,7 @@ using UniRx;
 using UnityEditorInternal;
 using UnityEngine.UI;
 
-public static class TextHandler
+public static class CardCreater
 {
     public static string GetEffectContent(IEffect effect)
     {
@@ -23,17 +23,48 @@ public static class TextHandler
             case EffecID.GainArmor:
                 word = $"獲得{effect.Value}點護甲";
                 break;
+            case EffecID.GetCard:
+                word = $"抽{effect.Value}張牌";
+                break;
+            case EffecID.RecoverHP:
+                word = $"回復{effect.Value}點血量";
+                break;
             default:
                 break;
         }
         return word;
+    }
+    public static IEffect MakeEffect(EffecID effecID, int result)
+    {
+        IEffect effect=null;
+        switch (effecID)
+        {
+            case EffecID.Damage:
+                effect = new Damage{Value = result};
+                break;
+            case  EffecID.GainArmor:
+                effect = new GainArmor{Value = result};
+                break;
+            case  EffecID.RemoveArmor :
+                effect = new RemoveArmor{Value = result};
+                break;
+            case EffecID.RecoverHP:
+                effect = new RecoverHP { Value = result };
+                break;
+            case EffecID.GetCard:
+                effect = new GetCard{ Value = result };
+                break;
+            default:
+                Tool.DeBugWarning($"{effecID} is not implemented");
+                break;
+        }
+        return effect;
     }
 }
 
 public class Card
 {
     private int id;
-    
     public Type type;
     public int cost;
     public List<IEffect> effects=new List<IEffect>();
@@ -50,42 +81,18 @@ public class Card
             int.TryParse(xmlInfo[index++],out int value);
             if (effecID!=EffecID.None)
             {
-                IEffect tempEffect = MakeEffect(effecID,value);
+                IEffect tempEffect = CardCreater.MakeEffect(effecID,value);
                 effects.Add(tempEffect);
             }
         }
     }
-
-    private IEffect MakeEffect(EffecID effecID, int result)
-    {
-        IEffect effect=null;
-        switch (effecID)
-        {
-            case EffecID.Damage:
-                effect = new Damage{Value = result};
-                break;
-            case  EffecID.GainArmor:
-                effect = new GainArmor{Value = result};
-                break;
-            case  EffecID.RemoveArmor :
-                effect = new RemoveArmor{Value = result};
-                break;
-            default:
-                Tool.DeBugWarning($"{effecID} is not implemented");
-                break;
-        }
-
-        return effect;
-    }
-
     public string GetContent()
     {
         string content=String.Empty;
         foreach (var effect in effects)
         {
-            content += TextHandler.GetEffectContent(effect);
+            content += CardCreater.GetEffectContent(effect);
         }
-
         return content;
     }
 

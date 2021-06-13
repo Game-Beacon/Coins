@@ -16,6 +16,21 @@ namespace Tools
                 return path;
             }
         }
+        
+        public static List<Card> ReadCardsFile()
+        {
+            XmlNode root = ReadXmlFile(CardsXmlFilePath);
+            List<XmlNode> CardNodes = ReadInnerNode(root);
+            List<Card> returnList= new List<Card>();
+            string[] cardInfo;
+            foreach (var cardNode in CardNodes)
+            {
+                cardInfo= ReadInnerText(cardNode);
+                Card card = new Card(cardInfo);
+                returnList.Add(card);
+            }
+            return returnList;
+        }
         private static XmlNode ReadXmlFile(string filePath)
         {
             if (!File.Exists(filePath))
@@ -58,20 +73,6 @@ namespace Tools
                 list[index++]=node.InnerText;
             }
             return list;
-        }
-        public static List<Card> ReadCardsFile()
-        {
-            XmlNode root = ReadXmlFile(CardsXmlFilePath);
-            List<XmlNode> CardNodes = ReadInnerNode(root);
-            List<Card> returnList= new List<Card>();
-            string[] cardInfo;
-            foreach (var cardNode in CardNodes)
-            {
-                cardInfo= ReadInnerText(cardNode);
-                Card card = new Card(cardInfo);
-                returnList.Add(card);
-            }
-            return returnList;
         }
     }
 }

@@ -13,6 +13,7 @@ public static class BattleSystem
     public static Dictionary<int, Guid> HandCards = new Dictionary<int, Guid>();
     public static bool yourTurn=false;
     private static CardsUI handCardsUI;
+    
 
     public static void SethandCardsUI(CardsUI cardUI)
     {
@@ -22,13 +23,28 @@ public static class BattleSystem
     {
         List<Card> deck=CardInfoSource.cards;
         Player= new Fakecharactor("player");
-        playerDeck = new Deck();
-        playerDeck.SetOriginDeck(deck);
+        Player.SubscribeHP((value) => 
+        {
+            if (value<=0)
+            {
+                Tool.DeBug("GamerOver");
+                TestSystems.Instance.EndGame();
+            }
+        });
+        playerDeck = new Deck(deck);
         Enemy = new Fakecharactor("enemy");
-        enemyDeck = new Deck();
-        enemyDeck.SetOriginDeck(deck);
+        Enemy.SubscribeHP((value) =>
+        {
+            if (value <= 0)
+            {
+                Tool.DeBug("YouAreWin");
+                TestSystems.Instance.EndGame();
+            }
+        });
+        enemyDeck = new Deck(deck);
     }
-    public static void AddHandCards(int count)
+
+    public static void PlayerAddHandCards(int count)
     {
         for (int i = 0; i < count; i++)
         {
@@ -51,6 +67,7 @@ public static class BattleSystem
         {
             return false;
         }
+        user.SetEP(user.Ep - card.cost);
         card.DoAction(target);
         HandCards.Remove(uiID);
         return true;
@@ -60,8 +77,7 @@ public static class BattleSystem
     public static void GameStart()
     {
         Tool.DeBug("GameStart");
-        AddHandCards(1);
-        
+        PlayerAddHandCards(1);
     }
 
 
@@ -70,7 +86,7 @@ public static class BattleSystem
         yourTurn=!yourTurn ;
         if (yourTurn)
         {
-            AddHandCards(2);
+            PlayerAddHandCards(2);
         }
     }
 

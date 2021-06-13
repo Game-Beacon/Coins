@@ -24,26 +24,25 @@ public static class UISource
             SetIsLoading();
         }
     }
-
     private static void SetIsLoading()
     {
         if (loadingCount>0)
         {
             isLoading = true;
-            Debug.Log("Loading");
+            Debug.Log($"UISourceLoading:{_loadingCount}");
         }
         else
         {
             isLoading = false;
-            Debug.Log("LoadingComplete");
+            Debug.Log("UISourceLoadingComplete");
         }
     }
 
+    
     public static void Intialize()
     {
         LoadAddressable<CardData>("Data/CardData.asset",SetCardData);
     }
-    
     public  static void LoadAddressable<T>(string address,Action<T> action)
     {
         loadingCount++;
@@ -53,7 +52,6 @@ public static class UISource
             loadingCount--;
         };
     }
-
     static void SetCardData(CardData cardData)
     {
         foreach (var VARIABLE in cardData.cardUIInfos)
@@ -67,6 +65,14 @@ public static class UISource
 
     public static CardUIInfo GetUIInfo(Type type)
     {
-        return cardUIInfos[type];
+        if (cardUIInfos.ContainsKey(type))
+        {
+            return cardUIInfos[type];
+        }
+        else
+        {
+            Tool.DeBugWarning($"type {type.ToString()} is not exist.");
+            return null;
+        }
     }
 }

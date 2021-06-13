@@ -5,7 +5,7 @@
 		<Attribute>attack</Attribute>
 		<Cost>1</Cost>
 		<Effect1>Damage</Effect1>
-		<Count1>100</Count1>
+		<Count1>45</Count1>
 		<Effect2>RemoveArmor</Effect2>
 		<Count2>5</Count2>
 	</Card>
@@ -31,5 +31,19 @@
 		<Cost>6</Cost>
 		<Effect1>GainArmor</Effect1>
 		<Count1>5</Count1>
+	</Card>
+	<Card>
+		<ID>5</ID>
+		<Attribute>talent</Attribute>
+		<Cost>1</Cost>
+		<Effect1>GetCard</Effect1>
+		<Count1>1</Count1>
+	</Card>
+	<Card>
+		<ID>6</ID>
+		<Attribute>talent</Attribute>
+		<Cost>1</Cost>
+		<Effect1>RecoverHP</Effect1>
+		<Count1>20</Count1>
 	</Card>
 </Cards>

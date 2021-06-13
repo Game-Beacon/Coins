@@ -1,5 +1,7 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
+using UniRx;
 using UnityEngine;
 using UnityEngine.Serialization;
 using UnityEngine.UI;
@@ -7,17 +9,28 @@ using UnityEngine.UI;
 public class HandCardsUI : MonoBehaviour,CardsUI
 {
     [SerializeField] private CardUI cardPrefab;
-    [SerializeField] private HorizontalLayoutGroup grid;
+    [SerializeField] private Transform dropCardPoint;
+    [Range(0, 5000)] [SerializeField] private int length = 500;
+    [Range(0, 360)] [SerializeField] private float defaultCardAngle;
+    [Range(0, 5000)] [SerializeField] private float handCardLength;
+
     private LinkedList<CardUI> cardUIs = new LinkedList<CardUI>();
     private Queue<CardUI> notUseCards = new Queue<CardUI>();
+    private List<Quaternion> angles;
+    private IDisposable disposable;
     public int SetCardAndReturnUniqueID(Card card, CardUIInfo info)
     {
         var useCard = ReturnNotUseCard();
+        useCard.transform.localPosition = dropCardPoint.localPosition;
+        useCard.transform.localRotation = dropCardPoint.localRotation;
+        useCard.transform.SetAsLastSibling();
+
         var id = useCard.SetCard(card, info);
         useCard.gameObject.SetActive(true);
+        SetCardsTransform();
         return id;
     }
-    public CardUI ReturnNotUseCard()
+    private CardUI ReturnNotUseCard()
     {
         CardUI cardUI;
         if (notUseCards.Count>0)
@@ -27,18 +40,118 @@ public class HandCardsUI : MonoBehaviour,CardsUI
         }
         else
         {
-            cardUI=Instantiate(cardPrefab,grid.transform);
+            cardUI=Instantiate(cardPrefab,transform);
             var node=cardUIs.AddLast(cardUI);
             cardUI.Initialize(this,node);
         }
         return cardUI;
     }
-
+    [ContextMenu("ReArrangeCards")]
+    public void SetCardsTransform()
+    {
+        float cardAngle = GetCardAngle();
+        Arrange(cardAngle);
+    }
+    private float GetCardAngle()
+    {
+        float cardsCount = cardUIs.Count;
+        float defaultCardAllAngles = cardsCount * defaultCardAngle;
+        bool IsCardAngelBiggerthanRange = defaultCardAllAngles > MaxAngleRange;
+        float cardAngle = defaultCardAngle;
+        if (IsCardAngelBiggerthanRange)
+        {
+            if (cardsCount>1)
+            {
+                cardAngle = MaxAngleRange / (cardsCount - 1);
+            }
+            else
+            {
+                cardAngle = 0;
+            }
+        }
+        return cardAngle;
+    }
+    private float MaxAngleRange
+    {
+        get
+        {
+            if (length <= 0 || handCardLength < 0)
+            {
+                return 0;
+            }
+            if (handCardLength > length)
+            {
+                return 0;
+            }
+            float angle = 2 * Mathf.Asin(handCardLength / length) * 180 / Mathf.PI;
+            return angle;
+        }
+    }
+    private void Arrange(float cardAngle)
+    {
+        if (cardAngle < 0)
+        {
+            Debug.LogError($"cardAngle must biggerthan 0");
+            return;
+        }
+        int cardCount = cardUIs.Count;
+        if (cardCount <= 0)
+        {
+            return;
+        }
+        float angleSum = (cardCount - 1) * cardAngle;
+        float startAngle = angleSum / 2;
+        float tempYaxisAngle = startAngle;
+        angles = new List<Quaternion>(cardCount);
+        for (int i = 0; i < cardCount; i++)
+        {
+            Quaternion quaternion = Quaternion.Euler(0, 0, tempYaxisAngle);
+            angles.Add(quaternion);
+            tempYaxisAngle -= cardAngle;
+        }
+        disposable?.Dispose();
+        disposable = Observable.EveryUpdate()
+            .Subscribe(_ => LerpCard());
+    }
+    private void LerpCard()
+    {
+        int cardCount = cardUIs.Count;
+        float t = Time.deltaTime;
+        bool IsDone = true;
+        var tempNode= cardUIs.First;
+        Transform tempTransform;
+        for (int i = 0; i < cardCount; i++)
+        {
+            tempTransform = tempNode.Value.transform;
+            tempNode = tempNode.Next;
+            var tempAngle = Quaternion.Lerp(tempTransform.localRotation, angles[i], t);
+            var tempPosition = Vector3.Lerp(tempTransform.localPosition, GetCardPosition(tempAngle), t);
+            var IsGetPosition = Vector3.Distance(tempPosition, tempTransform.localPosition) <= 0.000001;
+            var IsGetAngle = tempAngle == tempTransform.localRotation;
+            if (!IsGetAngle || !IsGetPosition)
+            {
+                IsDone = false;
+                tempTransform.localPosition = tempPosition;
+                tempTransform.localRotation = tempAngle;
+            }
+        }
+        if (IsDone)
+        {
+            disposable.Dispose();
+        }
+    }
+    private Vector3 GetCardPosition(Quaternion angle)
+    {
+        var direction = angle * new Vector3(0, 1, 0);
+        var finalPosition = direction * length - new Vector3(0, length, 0);
+        return finalPosition;
+    }
     public void RecycleCard(CardUI cardUI)
     {
         cardUI.gameObject.SetActive(false);
         cardUIs.Remove(cardUI.node);
         notUseCards.Enqueue(cardUI);
+        SetCardsTransform();
     }
 
 }

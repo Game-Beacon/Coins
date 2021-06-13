@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using UniRx;
 using UnityEngine;
@@ -6,10 +7,13 @@ using UnityEngine;
 
 public class Test : MonoBehaviour
 {
-    public void TestDrag()
+    public Transform[] cards;
+    public Transform card;
+    public int index;
+    [ContextMenu("testUI_SetSiblingIndex")]
+    public void SetSiblingIndex()
     {
-        transform.position = Input.mousePosition;
+        card.SetSiblingIndex(index);
     }
-    
 }
 

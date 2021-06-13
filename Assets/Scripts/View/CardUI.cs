@@ -36,7 +36,10 @@ public class CardUI : MonoBehaviour
 
     public void OnMouseUp()
     {
-        UseCard();
+        if (BattleSystem.yourTurn)
+        {
+            UseCard();
+        }
     }
     void UseCard()
     {

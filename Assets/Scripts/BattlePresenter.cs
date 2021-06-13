@@ -3,6 +3,7 @@
 
 
 using System;
+using System.Collections;
 using UniRx;
 using UnityEngine;
 using UnityEngine.Serialization;
@@ -15,14 +16,25 @@ public class BattlePresenter: MonoBehaviour
     [SerializeField]private BattleStatus enemyStatus;
     [SerializeField] private HandCardsUI cardsUI;
     [SerializeField] private Button endButton;
-    private void Awake()
+    IDisposable playerHp;
+    IDisposable playerEp;
+    IDisposable enemyHp;
+    IDisposable enemyEp;
+    public void Intialize()
     {
         BattleSystem.SethandCardsUI(cardsUI);
-        BattleSystem.Player.SubscribeHP(playerStatus.SetHp);
-        BattleSystem.Player.SubscribeEP(playerStatus.SetEneragy);
-        BattleSystem.Enemy.SubscribeHP(enemyStatus.SetHp);
-        BattleSystem.Enemy.SubscribeEP(enemyStatus.SetEneragy);
+        playerHp= BattleSystem.Player.SubscribeHP(playerStatus.SetHp);
+        playerEp= BattleSystem.Player.SubscribeEP(playerStatus.SetEneragy);
+        enemyHp= BattleSystem.Enemy.SubscribeHP(enemyStatus.SetHp);
+        enemyEp= BattleSystem.Enemy.SubscribeEP(enemyStatus.SetEneragy);
         endButton.onClick.AddListener(BattleSystem.EndTurn);
     }
-
+    public void GameEnd()
+    {
+        playerHp.Dispose();
+        playerEp.Dispose();
+        enemyHp.Dispose();
+        enemyEp.Dispose();
+        endButton.onClick.RemoveListener(BattleSystem.EndTurn);
+    }
 }

@@ -12,7 +12,10 @@ public enum EffecID
     None = 0,
     Damage,
     RemoveArmor,
-    GainArmor
+    GainArmor,
+    RecoverHP,
+    GetCard,
+    RecoverEP
 }
 
 public class Damage:IEffect
@@ -22,8 +25,7 @@ public class Damage:IEffect
 
     public void DoAction(Character target)
     {
-        int tempvalue = target.Hp-Value;
-        target.SetHP(tempvalue);
+        target.MinusHp(Value);
     }
 }
 public class RemoveArmor:IEffect
@@ -36,7 +38,8 @@ public class RemoveArmor:IEffect
         int tempvalue = target.Armor-Value;
         target.SetArmor(tempvalue);
     }
-}public class GainArmor:IEffect
+}
+public class GainArmor:IEffect
 {
     public EffecID EffecID { get; set; } = EffecID.GainArmor;
     public int Value { get; set; }
@@ -45,5 +48,35 @@ public class RemoveArmor:IEffect
     {
         int tempvalue = target.Armor+Value;
         target.SetArmor(tempvalue);
+    }
+}
+public class RecoverHP : IEffect
+{
+    public EffecID EffecID { get; set; } = EffecID.RecoverHP;
+    public int Value { get; set; }
+
+    public void DoAction(Character target)
+    {
+        target.AddHp(Value);
+    }
+}
+public class RecoverEP : IEffect
+{
+    public EffecID EffecID { get; set; } = EffecID.RecoverHP;
+    public int Value { get; set; }
+
+    public void DoAction(Character target)
+    {
+        target.AddHp(Value);
+    }
+}
+public class GetCard: IEffect
+{
+    public EffecID EffecID { get; set; } = EffecID.GetCard;
+    public int Value { get; set; }
+
+    public void DoAction(Character target)
+    {
+        BattleSystem.PlayerAddHandCards(Value);
     }
 }

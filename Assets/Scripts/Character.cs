@@ -6,6 +6,7 @@ using UnityEngine.Rendering.VirtualTexturing;
 public abstract class Character
 {
     protected ReactiveProperty<int> hp { get; private set; } = new ReactiveProperty<int>(100);
+    protected int maxHp=100;
     protected ReactiveProperty<int> ep { get; private set; }=new ReactiveProperty<int>(100);
     protected ReactiveProperty<int> armor { get; private set; }=new ReactiveProperty<int>(0);
 
@@ -33,6 +34,10 @@ public abstract class Character
     {
         hp.Value = value;
     }
+    public void SetEP(int value)
+    {
+        ep.Value = value;
+    }
     public void MinusHp(int value)
     {
         if (value<=0)
@@ -47,8 +52,31 @@ public abstract class Character
         }
         hp.Value = tempHp < 0 ? 0 : tempHp;
     }
+    public void AddHp(int value)
+    {
+        if (value <= 0)
+        {
+            return;
+        }
+        int tempHp = hp.Value + value;
+        hp.Value = tempHp > maxHp ? maxHp : tempHp;
+    }
     public void SetArmor(int value)
     {
         armor.Value = value;
     }
 }
+
+public class Fakecharactor : Character
+{
+    public string name;
+
+    public Fakecharactor()
+    {
+    }
+    public Fakecharactor(string name)
+    {
+        this.name = name;
+    }
+}
+

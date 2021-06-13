@@ -5,14 +5,21 @@ using UnityEngine;
 using UniRx;
 public class TestSystems : MonoBehaviour
 {
-    private void Awake()
+    public static TestSystems Instance;
+    [SerializeField] private BattlePresenter battlePresenter;
+    private void Start()
     {
+        Instance = this;
         UISource.Intialize();
         CardInfoSource.Intialize();
         BattleSystem.Intialize();
+        battlePresenter.Intialize();
         StartCoroutine(IntializedScene());
     }
-
+    public void EndGame()
+    {
+        battlePresenter.GameEnd();
+    }
     IEnumerator IntializedScene()
     {
         while (UISource.isLoading)
@@ -21,18 +28,4 @@ public class TestSystems : MonoBehaviour
         }
         BattleSystem.GameStart();
     }
-}
-public class Fakecharactor : Character
-{
-    public string name;
-
-    public Fakecharactor()
-    {
-    }
-    public Fakecharactor(string name)
-    {
-        this.name = name;
-    }
-
-    
 }
