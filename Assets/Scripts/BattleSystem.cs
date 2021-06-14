@@ -57,7 +57,7 @@ public static class BattleSystem
 
     public static bool PlayerUseCard(int uiID)
     {
-        return TryUseCard(uiID,BattleSystem.Player,BattleSystem.Enemy);
+        return TryUseCard(uiID,Player,Enemy);
     }
     private static bool TryUseCard(int uiID,Character user,Character target)
     {

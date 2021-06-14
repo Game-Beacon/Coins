@@ -174,9 +174,10 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   cardPrefab: {fileID: 52645984628527603, guid: c85f882de269f9448b97542159382590, type: 3}
   dropCardPoint: {fileID: 289538725}
-  length: 1409
-  defaultCardAngle: 11
-  handCardLength: 76
+  length: 2167
+  defaultCardAngle: 6
+  handCardLength: 303
+  speed: 2
 --- !u!1 &145393856
 GameObject:
   m_ObjectHideFlags: 0

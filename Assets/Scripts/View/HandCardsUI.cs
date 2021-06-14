@@ -18,13 +18,14 @@ public class HandCardsUI : MonoBehaviour,CardsUI
     private Queue<CardUI> notUseCards = new Queue<CardUI>();
     private List<Quaternion> angles;
     private IDisposable disposable;
+    public int speed=10;
+
     public int SetCardAndReturnUniqueID(Card card, CardUIInfo info)
     {
         var useCard = ReturnNotUseCard();
         useCard.transform.localPosition = dropCardPoint.localPosition;
         useCard.transform.localRotation = dropCardPoint.localRotation;
         useCard.transform.SetAsLastSibling();
-
         var id = useCard.SetCard(card, info);
         useCard.gameObject.SetActive(true);
         SetCardsTransform();
@@ -103,41 +104,14 @@ public class HandCardsUI : MonoBehaviour,CardsUI
         float startAngle = angleSum / 2;
         float tempYaxisAngle = startAngle;
         angles = new List<Quaternion>(cardCount);
+        var tempNode = cardUIs.First;
         for (int i = 0; i < cardCount; i++)
         {
             Quaternion quaternion = Quaternion.Euler(0, 0, tempYaxisAngle);
-            angles.Add(quaternion);
-            tempYaxisAngle -= cardAngle;
-        }
-        disposable?.Dispose();
-        disposable = Observable.EveryUpdate()
-            .Subscribe(_ => LerpCard());
-    }
-    private void LerpCard()
-    {
-        int cardCount = cardUIs.Count;
-        float t = Time.deltaTime;
-        bool IsDone = true;
-        var tempNode= cardUIs.First;
-        Transform tempTransform;
-        for (int i = 0; i < cardCount; i++)
-        {
-            tempTransform = tempNode.Value.transform;
+            var pos = GetCardPosition(quaternion);
+            tempNode.Value.SetCardPosition(pos,quaternion);
             tempNode = tempNode.Next;
-            var tempAngle = Quaternion.Lerp(tempTransform.localRotation, angles[i], t);
-            var tempPosition = Vector3.Lerp(tempTransform.localPosition, GetCardPosition(tempAngle), t);
-            var IsGetPosition = Vector3.Distance(tempPosition, tempTransform.localPosition) <= 0.000001;
-            var IsGetAngle = tempAngle == tempTransform.localRotation;
-            if (!IsGetAngle || !IsGetPosition)
-            {
-                IsDone = false;
-                tempTransform.localPosition = tempPosition;
-                tempTransform.localRotation = tempAngle;
-            }
-        }
-        if (IsDone)
-        {
-            disposable.Dispose();
+            tempYaxisAngle -= cardAngle;
         }
     }
     private Vector3 GetCardPosition(Quaternion angle)
