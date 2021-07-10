@@ -57,7 +57,7 @@ public class RecoverHP : IEffect
 
     public void DoAction(Character user, Character target)
     {
-        target.AddHp(Value);
+        user.AddHp(Value);
     }
 }
 public class RecoverEP : IEffect
@@ -67,7 +67,7 @@ public class RecoverEP : IEffect
 
     public void DoAction(Character user, Character target)
     {
-        target.AddHp(Value);
+        user.AddHp(Value);
     }
 }
 public class GetCard: IEffect
@@ -77,6 +77,6 @@ public class GetCard: IEffect
 
     public void DoAction(Character user, Character target)
     {
-        BattleSystem.AddHandCards(user);
+        user.AddCards(Value);
     }
 }

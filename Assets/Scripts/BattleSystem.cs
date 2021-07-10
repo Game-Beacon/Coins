@@ -9,8 +9,6 @@ public static class BattleSystem
     public static bool playerTurn;
 
     private static Dictionary<int, Guid> playerHandCards = new Dictionary<int, Guid>();
-    private static Dictionary<int, Guid> enemyHandCards = new Dictionary<int, Guid>();
-    private static CardsUI handCardsUI;
 
     public static Character Player { get; private set; }
     public static Character Enemy { get; private set; }
@@ -54,47 +52,24 @@ public static class BattleSystem
     private static void DoActionEndBuff(Character character)
     {
     }
-
-
-
-
-
-    public static void AddHandCards(Character character)
+    public static void SethandCardsUI(CardsUI playerUI, CardsUI enemyUI)
     {
-        for (int i = 0; i < character.DrawCountWhenYourTurn; i++)
-        {
-            var cardID = Guid.NewGuid();
-            var card= character.AddHandCard(cardID);
-            int uiID= handCardsUI.SetCardAndReturnUniqueID(card,UISource.GetUIInfo(card.type));
-            playerHandCards.Add(uiID,cardID);
-        }
+        Player.SetUI(playerUI);
+        Enemy.SetUI(enemyUI);
     }
-    public static void SethandCardsUI(CardsUI cardUI)
+    public static void PlayerUseCard(int uiID)
     {
-        handCardsUI = cardUI;
+        Player.TryUseCard(uiID, Enemy);
     }
-    public static bool PlayerUseCard(int uiID)
+    public static void EnemyUseCard(int uiID)
     {
-        return TryUseCard(uiID,Player,Enemy);
-    }
-    private static bool TryUseCard(int uiID,Character user,Character target)
-    {
-        var guid= playerHandCards[uiID];
-        Card card= Player.GetCard(guid);
-        if (card==null|| user.Ep<card.cost)
-        {
-            return false;
-        }
-        user.SetEP(user.Ep - card.cost);
-        card.DoAction(user,target);
-        playerHandCards.Remove(uiID);
-        return true;
+        Enemy.TryUseCard(uiID, Player);
     }
     public static void StartTurn()
     {
         var character = playerTurn ? Player : Enemy;
         character.StartTurn();
-        AddHandCards(character);
+        character.AddOneTurnHandCards();
     }
     public static void ChangeTurn()
     {

@@ -6,6 +6,7 @@ public class Deck
     List<Card> originDeck;
     private Queue<Card> deckPool=new Queue<Card>();
     private Dictionary<Guid,Card> handCards = new Dictionary<Guid, Card>();
+    public Dictionary<int, Guid> HandCards = new Dictionary<int, Guid>();
     public Deck(List<Card> deck)
     {
         originDeck = deck;

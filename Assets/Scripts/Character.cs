@@ -11,42 +11,71 @@ public abstract class Character
         drawCount.Value = drawCountWhenYourTurn;
     }
 
+
     protected ReactiveProperty<int> maxHP { get; private set; } = new ReactiveProperty<int>();
     protected ReactiveProperty<int> hp { get; private set; } = new ReactiveProperty<int>();
     protected ReactiveProperty<int> maxEP { get; private set; } = new ReactiveProperty<int>();
-
     protected ReactiveProperty<int> ep { get; private set; }=new ReactiveProperty<int>();
     protected ReactiveProperty<int> drawCount { get; private set; } = new ReactiveProperty<int>(1);
-    protected Deck deck;
-
     protected ReactiveProperty<int> armor { get; private set; }=new ReactiveProperty<int>();
-
+    
+    private CardsUI cardsUI;
+    private Deck deck;
 
     public int Hp => hp.Value;
     public int Ep => ep.Value;
     public int DrawCountWhenYourTurn => drawCount.Value;
     public int Armor => armor.Value;
-
-
     public bool IsDead { get; private set; } = false;
     
     public IDisposable SubscribeHP(Action<int> fuc)
     {
         return hp.Subscribe(fuc);
     }
-    public IDisposable SubscribeArmor(Action<int> fuc)
-    {
-        return armor.Subscribe(fuc);
-    }
     public IDisposable SubscribeEP(Action<int> fuc)
     {
         return ep.Subscribe(fuc);
     }
-
-    internal Card AddHandCard(Guid guid)
+    public IDisposable SubscribeArmor(Action<int> fuc)
     {
-        return deck.AddHandCard(guid);
+        return armor.Subscribe(fuc);
     }
+
+    public void SetUI(CardsUI ui)
+    {
+        cardsUI = ui;
+    }
+
+    internal void AddOneTurnHandCards()
+    {
+        AddCards(DrawCountWhenYourTurn);
+    }
+
+    public void AddCards(int count)
+    {
+        for (int i = 0; i < count; i++)
+        {
+            var guid = Guid.NewGuid();
+            var card = deck.AddHandCard(guid);
+            var uiID = cardsUI.SetCardAndReturnUniqueID(card, UISource.GetUIInfo(card.type));
+            deck.HandCards.Add(uiID, guid);
+        }
+    }
+    public void TryUseCard(int uiID, Character target)
+    {
+        var guid = deck.HandCards[uiID];
+        var card = GetCard(guid);
+        if (card == null || Ep < card.cost)
+        {
+            return;
+        }
+        SetEP(Ep - card.cost);
+        card.DoAction(this, target);
+
+        deck.HandCards.Remove(uiID);
+        cardsUI.RecycleCard(uiID);
+    }
+
 
     public void SetEP(int value)
     {
@@ -87,10 +116,11 @@ public abstract class Character
     {
         this.deck = deck;
     }
-    internal Card GetCard(Guid guid)
+    private  Card GetCard(Guid guid)
     {
         return deck.GetCard(guid);
     }
+
 
     internal void EndTurn()
     {

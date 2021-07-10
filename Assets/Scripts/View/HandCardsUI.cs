@@ -8,28 +8,24 @@ using UnityEngine.UI;
 
 public class HandCardsUI : MonoBehaviour,CardsUI
 {
+    public bool player;
     [SerializeField] private CardUI cardPrefab;
     [SerializeField] private Transform dropCardPoint;
     [Range(0, 5000)] [SerializeField] private int length = 500;
     [Range(0, 360)] [SerializeField] private float defaultCardAngle;
     [Range(0, 5000)] [SerializeField] private float handCardLength;
-
     private LinkedList<CardUI> cardUIs = new LinkedList<CardUI>();
     private Queue<CardUI> notUseCards = new Queue<CardUI>();
-    private List<Quaternion> angles;
-    private IDisposable disposable;
-    public int speed=10;
-
     public int SetCardAndReturnUniqueID(Card card, CardUIInfo info)
     {
         var useCard = ReturnNotUseCard();
         useCard.transform.localPosition = dropCardPoint.localPosition;
         useCard.transform.localRotation = dropCardPoint.localRotation;
         useCard.transform.SetAsLastSibling();
-        var id = useCard.SetCard(card, info);
+        var uiID = useCard.SetCard(card, info);
         useCard.gameObject.SetActive(true);
         ArrangeCards();
-        return id;
+        return uiID;
     }
     private CardUI ReturnNotUseCard()
     {
@@ -43,11 +39,11 @@ public class HandCardsUI : MonoBehaviour,CardsUI
         {
             cardUI=Instantiate(cardPrefab,transform);
             var node=cardUIs.AddLast(cardUI);
-            cardUI.Initialize(this,node);
+
+            cardUI.Initialize(node, player);
         }
         return cardUI;
     }
-
     private void ArrangeCards()
     {
         float cardAngle = GetCardAngle();
@@ -103,7 +99,6 @@ public class HandCardsUI : MonoBehaviour,CardsUI
         float angleSum = (cardCount - 1) * cardAngle;
         float startAngle = angleSum / 2;
         float tempYaxisAngle = startAngle;
-        angles = new List<Quaternion>(cardCount);
         var tempNode = cardUIs.First;
         for (int i = 0; i < cardCount; i++)
         {
@@ -121,12 +116,20 @@ public class HandCardsUI : MonoBehaviour,CardsUI
         return finalPosition;
     }
 
-    public void RecycleCard(CardUI cardUI)
+    public void RecycleCard(int uiID)
     {
-        cardUI.gameObject.SetActive(false);
-        cardUIs.Remove(cardUI.node);
-        notUseCards.Enqueue(cardUI);
-        ArrangeCards();
+        foreach (var item in cardUIs)
+        {
+            if (item.GetInstanceID()==uiID)
+            {
+                var cardUI = item;
+                cardUI.gameObject.SetActive(false);
+                cardUIs.Remove(cardUI.node);
+                notUseCards.Enqueue(cardUI);
+                ArrangeCards();
+                break;
+            }
+        }
     }
 
 }

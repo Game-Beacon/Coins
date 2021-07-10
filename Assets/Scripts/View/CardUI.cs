@@ -11,7 +11,6 @@ public class CardUI : MonoBehaviour
     [SerializeField] private Text captain;
     [SerializeField] private Text content;
     [SerializeField] private Text cost;
-    private HandCardsUI handCardsUI;
     public LinkedListNode<CardUI> node { get; private set; }
     IDisposable upDateTransfrom;
     private Vector3 positionShouldBe;
@@ -27,10 +26,20 @@ public class CardUI : MonoBehaviour
             return IsArriveRightAngle && IsArriveRightPosition;
         }
     }
-    public void Initialize(HandCardsUI handCardsUI,LinkedListNode<CardUI> linkedListNode)
+    private bool player;
+    private Action<int> useCard;
+    public void Initialize(LinkedListNode<CardUI> linkedListNode,bool player)
     {
-        this.handCardsUI = handCardsUI;
-        this.node = linkedListNode;
+        if (player)
+        {
+            useCard = BattleSystem.PlayerUseCard;
+        }
+        else
+        {
+            useCard = BattleSystem.EnemyUseCard;
+        }
+        this.player = player;
+        node = linkedListNode;
     }
     public int SetCard(Card card,CardUIInfo info)
     {
@@ -86,21 +95,13 @@ public class CardUI : MonoBehaviour
 
     public void OnMouseUp()
     {
-        if (BattleSystem.playerTurn && Vector3.Distance(transform.position, positionShouldBe) > 1000)
+        if (BattleSystem.playerTurn== player && Vector3.Distance(transform.position, positionShouldBe) > 1000)
         {
-            UseCard();
+            useCard?.Invoke(GetInstanceID());
         }
         else
         {
             EveryUpdateTransform();
         }
-    }
-    void UseCard()
-    {
-        if (BattleSystem.PlayerUseCard(GetInstanceID()))
-        {
-            handCardsUI.RecycleCard(this);
-        }
-        
     }
 }
