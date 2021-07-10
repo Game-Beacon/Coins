@@ -6,88 +6,105 @@ using UnityEngine;
 
 public static class BattleSystem 
 {
-    public static Character Player { get; private set; }
-    public static Deck playerDeck;
-    public static Character Enemy { get;  private set;}
-    public static Deck enemyDeck;
-    public static Dictionary<int, Guid> HandCards = new Dictionary<int, Guid>();
-    public static bool yourTurn=false;
-    private static CardsUI handCardsUI;
-    
+    public static bool playerTurn;
 
-    public static void SethandCardsUI(CardsUI cardUI)
-    {
-        handCardsUI = cardUI;
-    }
+    private static Dictionary<int, Guid> playerHandCards = new Dictionary<int, Guid>();
+    private static Dictionary<int, Guid> enemyHandCards = new Dictionary<int, Guid>();
+    private static CardsUI handCardsUI;
+
+    public static Character Player { get; private set; }
+    public static Character Enemy { get; private set; }
+
     public static void Intialize()
     {
         List<Card> deck=CardInfoSource.cards;
         Player= new Fakecharactor("player");
-        Player.SubscribeHP((value) => 
-        {
-            if (value<=0)
-            {
-                Tool.DeBug("GamerOver");
-                TestSystems.Instance.EndGame();
-            }
-        });
-        playerDeck = new Deck(deck);
+        Player.SubscribeHP(CheckPlayerHP);
+        Player.AddDeck(new Deck(deck));
         Enemy = new Fakecharactor("enemy");
-        Enemy.SubscribeHP((value) =>
-        {
-            if (value <= 0)
-            {
-                Tool.DeBug("YouAreWin");
-                TestSystems.Instance.EndGame();
-            }
-        });
-        enemyDeck = new Deck(deck);
+        Enemy.SubscribeHP(CheckEnemyHP);
+        Enemy.AddDeck(new Deck(deck));
     }
-
-    public static void PlayerAddHandCards(int count)
+    private static void CheckPlayerHP(int value)
     {
-        for (int i = 0; i < count; i++)
+        if (value <= 0)
         {
-            var guid = Guid.NewGuid();
-            var card= playerDeck.AddHandCard(guid);
-            int id= handCardsUI.SetCardAndReturnUniqueID(card,UISource.GetUIInfo(card.type));
-            HandCards.Add(id,guid);
+            Tool.DeBug("GamerOver");
+            TestSystems.Instance.EndGame();
         }
     }
+    private static void CheckEnemyHP(int value)
+    {
+        if (value <= 0)
+        {
+            Tool.DeBug("YouWin");
+            TestSystems.Instance.EndGame();
+        }
+    }
+    public static void GameStart(bool yourTurn=true)
+    {
+        Tool.DeBug("GameStart");
+        playerTurn = yourTurn;
+        StartTurn();
+    }
 
+    private static void DoActionStartBuff(Character character)
+    {
+    }
+    private static void DoActionEndBuff(Character character)
+    {
+    }
+
+
+
+
+
+    public static void AddHandCards(Character character)
+    {
+        for (int i = 0; i < character.DrawCountWhenYourTurn; i++)
+        {
+            var cardID = Guid.NewGuid();
+            var card= character.AddHandCard(cardID);
+            int uiID= handCardsUI.SetCardAndReturnUniqueID(card,UISource.GetUIInfo(card.type));
+            playerHandCards.Add(uiID,cardID);
+        }
+    }
+    public static void SethandCardsUI(CardsUI cardUI)
+    {
+        handCardsUI = cardUI;
+    }
     public static bool PlayerUseCard(int uiID)
     {
         return TryUseCard(uiID,Player,Enemy);
     }
     private static bool TryUseCard(int uiID,Character user,Character target)
     {
-        var guid= HandCards[uiID];
-        Card card= playerDeck.GetCard(guid);
+        var guid= playerHandCards[uiID];
+        Card card= Player.GetCard(guid);
         if (card==null|| user.Ep<card.cost)
         {
             return false;
         }
         user.SetEP(user.Ep - card.cost);
-        card.DoAction(target);
-        HandCards.Remove(uiID);
+        card.DoAction(user,target);
+        playerHandCards.Remove(uiID);
         return true;
     }
-
-
-    public static void GameStart()
+    public static void StartTurn()
     {
-        Tool.DeBug("GameStart");
-        PlayerAddHandCards(1);
+        var character = playerTurn ? Player : Enemy;
+        character.StartTurn();
+        AddHandCards(character);
     }
-
-
-    public static void EndTurn()
+    public static void ChangeTurn()
     {
-        yourTurn=!yourTurn ;
-        if (yourTurn)
-        {
-            PlayerAddHandCards(2);
-        }
+        EndTurn();
+        playerTurn = !playerTurn ;
+        StartTurn();
     }
-
+    private static void EndTurn()
+    {
+        var character = playerTurn ? Player : Enemy;
+        character.EndTurn();
+    }
 }

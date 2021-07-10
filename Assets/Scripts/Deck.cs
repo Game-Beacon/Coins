@@ -1,22 +1,20 @@
 ﻿using System;
 using System.Collections.Generic;
-using UnityEngine;
 
 public class Deck
 {
     List<Card> originDeck;
     private Queue<Card> deckPool=new Queue<Card>();
-    public Dictionary<Guid,Card> handCards = new Dictionary<Guid, Card>();
-
+    private Dictionary<Guid,Card> handCards = new Dictionary<Guid, Card>();
     public Deck(List<Card> deck)
     {
         originDeck = deck;
     }
     public Card AddHandCard(Guid uiGuid)
     {
-        var nextCard = GetNextCard();
-        handCards.Add(uiGuid,nextCard);
-        return nextCard;
+        var card = GetNextCard();
+        handCards.Add(uiGuid,card);
+        return card;
     }
 
     private Card GetNextCard()

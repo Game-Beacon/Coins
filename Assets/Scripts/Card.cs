@@ -96,11 +96,11 @@ public class Card
         return content;
     }
 
-    public void DoAction(Character target)
+    public void DoAction(Character user, Character target)
     {
         foreach (var effect in effects)
         {
-            effect.DoAction(target);
+            effect.DoAction(user,target);
         }
     }
 }

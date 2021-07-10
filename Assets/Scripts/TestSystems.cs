@@ -5,11 +5,19 @@ using UnityEngine;
 using UniRx;
 public class TestSystems : MonoBehaviour
 {
-    public static TestSystems Instance;
+    public static TestSystems Instance=>instance;
+    private static TestSystems instance;
     [SerializeField] private BattlePresenter battlePresenter;
     private void Start()
     {
-        Instance = this;
+        if (instance!= null)
+        {
+            Tool.DeBugWarning("system should only one");
+        }
+        else
+        {
+            instance = this;
+        }
         UISource.Intialize();
         CardInfoSource.Intialize();
         BattleSystem.Intialize();

@@ -86,7 +86,7 @@ public class CardUI : MonoBehaviour
 
     public void OnMouseUp()
     {
-        if (BattleSystem.yourTurn && Vector3.Distance(transform.position, positionShouldBe) > 1000)
+        if (BattleSystem.playerTurn && Vector3.Distance(transform.position, positionShouldBe) > 1000)
         {
             UseCard();
         }

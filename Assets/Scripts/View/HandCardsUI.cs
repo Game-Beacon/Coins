@@ -28,7 +28,7 @@ public class HandCardsUI : MonoBehaviour,CardsUI
         useCard.transform.SetAsLastSibling();
         var id = useCard.SetCard(card, info);
         useCard.gameObject.SetActive(true);
-        SetCardsTransform();
+        ArrangeCards();
         return id;
     }
     private CardUI ReturnNotUseCard()
@@ -47,8 +47,8 @@ public class HandCardsUI : MonoBehaviour,CardsUI
         }
         return cardUI;
     }
-    [ContextMenu("ReArrangeCards")]
-    public void SetCardsTransform()
+
+    private void ArrangeCards()
     {
         float cardAngle = GetCardAngle();
         Arrange(cardAngle);
@@ -120,12 +120,13 @@ public class HandCardsUI : MonoBehaviour,CardsUI
         var finalPosition = direction * length - new Vector3(0, length, 0);
         return finalPosition;
     }
+
     public void RecycleCard(CardUI cardUI)
     {
         cardUI.gameObject.SetActive(false);
         cardUIs.Remove(cardUI.node);
         notUseCards.Enqueue(cardUI);
-        SetCardsTransform();
+        ArrangeCards();
     }
 
 }

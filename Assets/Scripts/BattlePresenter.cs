@@ -27,7 +27,7 @@ public class BattlePresenter: MonoBehaviour
         playerEp= BattleSystem.Player.SubscribeEP(playerStatus.SetEneragy);
         enemyHp= BattleSystem.Enemy.SubscribeHP(enemyStatus.SetHp);
         enemyEp= BattleSystem.Enemy.SubscribeEP(enemyStatus.SetEneragy);
-        endButton.onClick.AddListener(BattleSystem.EndTurn);
+        endButton.onClick.AddListener(BattleSystem.ChangeTurn);
     }
     public void GameEnd()
     {
@@ -35,6 +35,6 @@ public class BattlePresenter: MonoBehaviour
         playerEp.Dispose();
         enemyHp.Dispose();
         enemyEp.Dispose();
-        endButton.onClick.RemoveListener(BattleSystem.EndTurn);
+        endButton.onClick.RemoveListener(BattleSystem.ChangeTurn);
     }
 }
