@@ -27,7 +27,7 @@ public abstract class Character
     public int DrawCountWhenYourTurn => drawCount.Value;
     public int Armor => armor.Value;
     public bool IsDead { get; private set; } = false;
-    
+
     public IDisposable SubscribeHP(Action<int> fuc)
     {
         return hp.Subscribe(fuc);
@@ -41,41 +41,47 @@ public abstract class Character
         return armor.Subscribe(fuc);
     }
 
+
     public void SetUI(CardsUI ui)
     {
         cardsUI = ui;
     }
 
-    internal void AddOneTurnHandCards()
+    public void AddOneTurnHandCards()
     {
         AddCards(DrawCountWhenYourTurn);
     }
-
     public void AddCards(int count)
     {
         for (int i = 0; i < count; i++)
         {
-            var guid = Guid.NewGuid();
-            var card = deck.AddHandCard(guid);
-            var uiID = cardsUI.SetCardAndReturnUniqueID(card, UISource.GetUIInfo(card.type));
-            deck.HandCards.Add(uiID, guid);
+            var card = deck.AddHandCard();
+            cardsUI.SetCardAndReturnUniqueID(card, UISource.GetUIInfo(card.type));
         }
     }
-    public void TryUseCard(int uiID, Character target)
+    public void TryUseCard(Guid guid, Character target)
     {
-        var guid = deck.HandCards[uiID];
-        var card = GetCard(guid);
-        if (card == null || Ep < card.cost)
+        var isUseAble = CheckUseAble(guid);
+        if (!isUseAble)
         {
             return;
         }
-        SetEP(Ep - card.cost);
-        card.DoAction(this, target);
-
-        deck.HandCards.Remove(uiID);
-        cardsUI.RecycleCard(uiID);
+        UseCard(guid, target);
     }
 
+    private void UseCard(Guid guid, Character target)
+    {
+        Card card = GetCard(guid);
+        SetEP(Ep - card.cost);
+        card.DoAction(this, target);
+        deck.RemoveHandCard(guid);
+        cardsUI.RecycleCard(guid);
+    }
+
+    private Card GetCard(Guid guid)
+    {
+        return deck.GetCard(guid);
+    }
 
     public void SetEP(int value)
     {
@@ -116,9 +122,14 @@ public abstract class Character
     {
         this.deck = deck;
     }
-    private  Card GetCard(Guid guid)
+    private  bool CheckUseAble(Guid guid)
     {
-        return deck.GetCard(guid);
+        var cost=deck.GetCost(guid);
+        if (cost<0)
+        {
+            return false;
+        }
+        return Ep >= cost;
     }
 
 

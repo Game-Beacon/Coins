@@ -12,6 +12,7 @@ public class CardUI : MonoBehaviour
     [SerializeField] private Text content;
     [SerializeField] private Text cost;
     public LinkedListNode<CardUI> node { get; private set; }
+    public Guid guid { get; private set; }
     IDisposable upDateTransfrom;
     private Vector3 positionShouldBe;
     private Quaternion quaternionShouldBe;
@@ -27,7 +28,7 @@ public class CardUI : MonoBehaviour
         }
     }
     private bool player;
-    private Action<int> useCard;
+    private Action<Guid> useCard;
     public void Initialize(LinkedListNode<CardUI> linkedListNode,bool player)
     {
         if (player)
@@ -41,14 +42,14 @@ public class CardUI : MonoBehaviour
         this.player = player;
         node = linkedListNode;
     }
-    public int SetCard(Card card,CardUIInfo info)
+    public void SetCard(Guid guid, Card card,CardUIInfo info)
     {
+        this.guid = guid;
         bg.sprite = info.bg;
         frame.sprite = info.card;
         captain.text = card.type.ToString();
         content.text = card.GetContent();
         cost.text = card.cost.ToString();
-        return GetInstanceID();
     }
     public void SetCardPosition(Vector3 position,Quaternion quaternion)
     {
@@ -95,9 +96,9 @@ public class CardUI : MonoBehaviour
 
     public void OnMouseUp()
     {
-        if (BattleSystem.playerTurn== player && Vector3.Distance(transform.position, positionShouldBe) > 1000)
+        if (BattleSystem.PlayerTurn== player && Vector3.Distance(transform.position, positionShouldBe) > 1000)
         {
-            useCard?.Invoke(GetInstanceID());
+            useCard?.Invoke(guid);
         }
         else
         {

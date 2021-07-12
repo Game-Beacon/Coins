@@ -1,11 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq.Expressions;
+using System.Runtime.Serialization;
+using System.Runtime.Serialization.Formatters.Binary;
 using UniRx;
 using UnityEditorInternal;
 using UnityEngine.UI;
 
-public static class CardCreater
+public static class CardFactory
 {
     public static string GetEffectContent(IEffect effect)
     {
@@ -52,7 +55,7 @@ public static class CardCreater
                 effect = new RecoverHP { Value = result };
                 break;
             case EffecID.GetCard:
-                effect = new GetCard{ Value = result };
+                effect = new AddHandCard{ Value = result };
                 break;
             default:
                 Tool.DeBugWarning($"{effecID} is not implemented");
@@ -62,13 +65,17 @@ public static class CardCreater
     }
 }
 
+
+
+[Serializable]
 public class Card
 {
     private int id;
     public Type type;
     public int cost;
     public List<IEffect> effects=new List<IEffect>();
-
+    public Guid guid { get; private set; } = new Guid();
+    public Card() { }
     public Card(string[] xmlInfo)
     {
         int index = 0;
@@ -81,7 +88,7 @@ public class Card
             int.TryParse(xmlInfo[index++],out int value);
             if (effecID!=EffecID.None)
             {
-                IEffect tempEffect = CardCreater.MakeEffect(effecID,value);
+                IEffect tempEffect = CardFactory.MakeEffect(effecID,value);
                 effects.Add(tempEffect);
             }
         }
@@ -91,17 +98,40 @@ public class Card
         string content=String.Empty;
         foreach (var effect in effects)
         {
-            content += CardCreater.GetEffectContent(effect);
+            content += CardFactory.GetEffectContent(effect);
         }
         return content;
     }
-
+    public void ReSetGuid()
+    {
+        guid = Guid.NewGuid();
+        Tool.DeBug(guid.ToString());
+    }
     public void DoAction(Character user, Character target)
     {
         foreach (var effect in effects)
         {
             effect.DoAction(user,target);
         }
+    }
+
+    public Card DeepClone()
+    {
+        Card card;
+        using (Stream objectStream = new MemoryStream())
+        {
+            //序列化物件格式
+            IFormatter formatter = new BinaryFormatter();
+            //將自己所有資料序列化
+            formatter.Serialize(objectStream, this);
+            //複寫資料流位置，返回最前端
+            objectStream.Seek(0, SeekOrigin.Begin);
+            //再將objectStream反序列化回去 
+            card= formatter.Deserialize(objectStream) as Card;
+        }
+        card.ReSetGuid();
+        return card;
+
     }
 }
 

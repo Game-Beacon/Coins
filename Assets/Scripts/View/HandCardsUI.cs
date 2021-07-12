@@ -16,16 +16,15 @@ public class HandCardsUI : MonoBehaviour,CardsUI
     [Range(0, 5000)] [SerializeField] private float handCardLength;
     private LinkedList<CardUI> cardUIs = new LinkedList<CardUI>();
     private Queue<CardUI> notUseCards = new Queue<CardUI>();
-    public int SetCardAndReturnUniqueID(Card card, CardUIInfo info)
+    public void SetCardAndReturnUniqueID(Card card, CardUIInfo info)
     {
         var useCard = ReturnNotUseCard();
         useCard.transform.localPosition = dropCardPoint.localPosition;
         useCard.transform.localRotation = dropCardPoint.localRotation;
         useCard.transform.SetAsLastSibling();
-        var uiID = useCard.SetCard(card, info);
+        useCard.SetCard(card.guid, card, info);
         useCard.gameObject.SetActive(true);
         ArrangeCards();
-        return uiID;
     }
     private CardUI ReturnNotUseCard()
     {
@@ -116,11 +115,11 @@ public class HandCardsUI : MonoBehaviour,CardsUI
         return finalPosition;
     }
 
-    public void RecycleCard(int uiID)
+    public void RecycleCard(Guid guid)
     {
         foreach (var item in cardUIs)
         {
-            if (item.GetInstanceID()==uiID)
+            if (item.guid==guid)
             {
                 var cardUI = item;
                 cardUI.gameObject.SetActive(false);

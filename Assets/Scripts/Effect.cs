@@ -1,10 +1,11 @@
 using System;
+using System.Collections.Generic;
 
-public interface IEffect 
+public interface IEffect
 {
-    public EffecID EffecID { get; set; }
-    public int Value { get; set; }
-    public abstract void DoAction(Character user, Character target);
+    EffecID EffecID { get; set; }
+    int Value { get; set; }
+    void DoAction(Character user, Character target);
 
 }
 public enum EffecID
@@ -17,8 +18,8 @@ public enum EffecID
     GetCard,
     RecoverEP
 }
-
-public class Damage:IEffect
+[Serializable]
+public class Damage : IEffect
 {
     public EffecID EffecID { get; set; } = EffecID.Damage;
     public int Value { get; set; }
@@ -28,28 +29,31 @@ public class Damage:IEffect
         target.MinusHp(Value);
     }
 }
-public class RemoveArmor:IEffect
+[Serializable]
+public class RemoveArmor : IEffect
 {
     public EffecID EffecID { get; set; } = EffecID.RemoveArmor;
     public int Value { get; set; }
 
     public void DoAction(Character user, Character target)
     {
-        int tempvalue = target.Armor-Value;
+        int tempvalue = target.Armor - Value;
         target.SetArmor(tempvalue);
     }
 }
-public class GainArmor:IEffect
+[Serializable]
+public class GainArmor : IEffect
 {
     public EffecID EffecID { get; set; } = EffecID.GainArmor;
     public int Value { get; set; }
 
     public void DoAction(Character user, Character target)
     {
-        int tempvalue = target.Armor+Value;
+        int tempvalue = target.Armor + Value;
         target.SetArmor(tempvalue);
     }
 }
+[Serializable]
 public class RecoverHP : IEffect
 {
     public EffecID EffecID { get; set; } = EffecID.RecoverHP;
@@ -60,6 +64,24 @@ public class RecoverHP : IEffect
         user.AddHp(Value);
     }
 }
+[Serializable]
+public class RecoverHPBuff
+{
+    List<IEffect> effects = new List<IEffect>();
+
+    public void DoAction(Character user, Character target)
+    {
+        foreach (var item in effects)
+        {
+            item.DoAction(user,target);
+        }
+    }
+}
+
+
+
+
+[Serializable]
 public class RecoverEP : IEffect
 {
     public EffecID EffecID { get; set; } = EffecID.RecoverHP;
@@ -70,7 +92,8 @@ public class RecoverEP : IEffect
         user.AddHp(Value);
     }
 }
-public class GetCard: IEffect
+[Serializable]
+public class AddHandCard : IEffect
 {
     public EffecID EffecID { get; set; } = EffecID.GetCard;
     public int Value { get; set; }

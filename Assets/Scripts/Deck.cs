@@ -3,18 +3,19 @@ using System.Collections.Generic;
 
 public class Deck
 {
-    List<Card> originDeck;
-    private Queue<Card> deckPool=new Queue<Card>();
-    private Dictionary<Guid,Card> handCards = new Dictionary<Guid, Card>();
-    public Dictionary<int, Guid> HandCards = new Dictionary<int, Guid>();
     public Deck(List<Card> deck)
     {
         originDeck = deck;
     }
-    public Card AddHandCard(Guid uiGuid)
+
+    private List<Card> originDeck;
+    private Queue<Card> deckPool=new Queue<Card>();
+    private Dictionary<Guid,Card> handCards = new Dictionary<Guid, Card>();
+
+    public Card AddHandCard()
     {
         var card = GetNextCard();
-        handCards.Add(uiGuid,card);
+        handCards.Add(card.guid,card);
         return card;
     }
 
@@ -31,7 +32,7 @@ public class Deck
     {
         foreach (var item in originDeck)
         {
-            deckPool.Enqueue(item);
+            deckPool.Enqueue(item.DeepClone());
         }
     }
 
@@ -40,8 +41,21 @@ public class Deck
         handCards.Remove(UiGuid);
     }
 
-    public Card GetCard(Guid uiID)
+    public int GetCost(Guid guid)
     {
-        return handCards[uiID];
+        if (handCards.ContainsKey(guid))
+        {
+            return handCards[guid].cost;
+        }
+        Tool.DeBugWarning("Card is not existed");
+        return -1;
+    }
+
+    internal Card GetCard(Guid guid)
+    {
+        return handCards[guid];
     }
 }
+
+
+

@@ -1,5 +1,7 @@
+using System;
+
 public interface CardsUI
 {
-    int SetCardAndReturnUniqueID(Card card, CardUIInfo info);
-    void RecycleCard(int guid);
+    void SetCardAndReturnUniqueID(Card card, CardUIInfo info);
+    void RecycleCard(Guid guid);
 }

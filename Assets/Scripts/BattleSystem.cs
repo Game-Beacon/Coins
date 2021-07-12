@@ -4,19 +4,18 @@ using System.Collections.Generic;
 using UniRx;
 using UnityEngine;
 
-public static class BattleSystem 
+public static class BattleSystem
 {
-    public static bool playerTurn;
-
-    private static Dictionary<int, Guid> playerHandCards = new Dictionary<int, Guid>();
+    public static bool PlayerTurn => playerTurn;
+    private static bool playerTurn;
 
     public static Character Player { get; private set; }
     public static Character Enemy { get; private set; }
 
     public static void Intialize()
     {
-        List<Card> deck=CardInfoSource.cards;
-        Player= new Fakecharactor("player");
+        List<Card> deck = CardInfoSource.cards;
+        Player = new Fakecharactor("player");
         Player.SubscribeHP(CheckPlayerHP);
         Player.AddDeck(new Deck(deck));
         Enemy = new Fakecharactor("enemy");
@@ -39,47 +38,48 @@ public static class BattleSystem
             TestSystems.Instance.EndGame();
         }
     }
-    public static void GameStart(bool yourTurn=true)
+
+
+    public static void GameStart(bool yourTurn = true)
     {
-        Tool.DeBug("GameStart");
         playerTurn = yourTurn;
         StartTurn();
     }
+    private static void StartTurn()
+    {
+        var character = PlayerTurn ? Player : Enemy;
+        character.StartTurn();
+        character.AddOneTurnHandCards();
+    }
 
-    private static void DoActionStartBuff(Character character)
-    {
-    }
-    private static void DoActionEndBuff(Character character)
-    {
-    }
     public static void SethandCardsUI(CardsUI playerUI, CardsUI enemyUI)
     {
         Player.SetUI(playerUI);
         Enemy.SetUI(enemyUI);
     }
-    public static void PlayerUseCard(int uiID)
+    public static void PlayerUseCard(Guid guid)
     {
-        Player.TryUseCard(uiID, Enemy);
+        Player.TryUseCard(guid, Enemy);
     }
-    public static void EnemyUseCard(int uiID)
+    public static void EnemyUseCard(Guid guid)
     {
-        Enemy.TryUseCard(uiID, Player);
-    }
-    public static void StartTurn()
-    {
-        var character = playerTurn ? Player : Enemy;
-        character.StartTurn();
-        character.AddOneTurnHandCards();
+        Enemy.TryUseCard(guid, Player);
     }
     public static void ChangeTurn()
     {
         EndTurn();
-        playerTurn = !playerTurn ;
+        playerTurn = !playerTurn;
         StartTurn();
     }
     private static void EndTurn()
     {
-        var character = playerTurn ? Player : Enemy;
+        var character = PlayerTurn ? Player : Enemy;
         character.EndTurn();
+    }
+    private static void DoActionStartBuff(Character character)
+    {
+    }
+    private static void DoActionEndBuff(Character character)
+    {
     }
 }
