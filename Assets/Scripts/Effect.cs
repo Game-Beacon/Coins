@@ -3,10 +3,28 @@ using System.Collections.Generic;
 
 public interface IEffect
 {
-    EffecID EffecID { get; set; }
-    int Value { get; set; }
+    string GetContent();
     void DoAction(Character user, Character target);
+}
+[Serializable]
+public abstract class Effect : IEffect
+{
+    protected IEffect baseEffect;
+    public int Value { get; set; }
 
+    public void DoAction(Character user, Character target)
+    {
+        Action(user,target);
+        baseEffect?.DoAction(user, target);
+    }
+    protected abstract void Action(Character user, Character target);
+    public string GetContent()
+    {
+        string value= GetEffectContent();
+        string value2= baseEffect?.GetContent();
+        return value2==null? value:value + value2;
+    }
+    protected abstract string GetEffectContent();
 }
 public enum EffecID
 {
@@ -19,87 +37,84 @@ public enum EffecID
     RecoverEP
 }
 [Serializable]
-public class Damage : IEffect
+public class Damage : Effect
 {
-    public EffecID EffecID { get; set; } = EffecID.Damage;
-    public int Value { get; set; }
-
-    public void DoAction(Character user, Character target)
+    protected override void Action(Character user, Character target)
     {
         target.MinusHp(Value);
     }
+
+    protected override string GetEffectContent()
+    {
+        return$"對敵人造成{Value}點傷害";
+    }
 }
 [Serializable]
-public class RemoveArmor : IEffect
+public class RemoveArmor : Effect
 {
-    public EffecID EffecID { get; set; } = EffecID.RemoveArmor;
-    public int Value { get; set; }
-
-    public void DoAction(Character user, Character target)
+    protected override void Action(Character user, Character target)
     {
         int tempvalue = target.Armor - Value;
         target.SetArmor(tempvalue);
     }
+
+    protected override string GetEffectContent()
+    {
+        return $"移除敵人{Value}點護甲";
+    }
 }
 [Serializable]
-public class GainArmor : IEffect
+public class GainArmor : Effect
 {
-    public EffecID EffecID { get; set; } = EffecID.GainArmor;
-    public int Value { get; set; }
-
-    public void DoAction(Character user, Character target)
+    protected override void Action(Character user, Character target)
     {
         int tempvalue = target.Armor + Value;
         target.SetArmor(tempvalue);
     }
+
+    protected override string GetEffectContent()
+    {
+        return $"獲得{Value}點護甲";
+    }
 }
 [Serializable]
-public class RecoverHP : IEffect
+public class RecoverHP : Effect
 {
-    public EffecID EffecID { get; set; } = EffecID.RecoverHP;
-    public int Value { get; set; }
 
-    public void DoAction(Character user, Character target)
+    protected override void Action(Character user, Character target)
     {
         user.AddHp(Value);
     }
-}
-[Serializable]
-public class RecoverHPBuff
-{
-    List<IEffect> effects = new List<IEffect>();
 
-    public void DoAction(Character user, Character target)
+    protected override string GetEffectContent()
     {
-        foreach (var item in effects)
-        {
-            item.DoAction(user,target);
-        }
+        return $"回復{Value}點血量";
     }
 }
-
-
-
-
 [Serializable]
-public class RecoverEP : IEffect
+public class RecoverEP : Effect
 {
-    public EffecID EffecID { get; set; } = EffecID.RecoverHP;
-    public int Value { get; set; }
-
-    public void DoAction(Character user, Character target)
+    protected override void Action(Character user, Character target)
     {
         user.AddHp(Value);
     }
+
+    protected override string GetEffectContent()
+    {
+        return $"回復{Value}點魔力";
+    }
 }
 [Serializable]
-public class AddHandCard : IEffect
+public class AddHandCard : Effect
 {
-    public EffecID EffecID { get; set; } = EffecID.GetCard;
-    public int Value { get; set; }
 
-    public void DoAction(Character user, Character target)
+    protected override void Action(Character user, Character target)
     {
         user.AddCards(Value);
+    }
+
+    protected override string GetEffectContent()
+    {
+        return $"抽{Value}張牌";
     }
 }

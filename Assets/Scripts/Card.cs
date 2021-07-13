@@ -10,33 +10,7 @@ using UnityEngine.UI;
 
 public static class CardFactory
 {
-    public static string GetEffectContent(IEffect effect)
-    {
-        string word = string.Empty;
-        switch (effect.EffecID)
-        {
-            case EffecID.None:
-                break;
-            case EffecID.Damage:
-                word = $"對敵人造成{effect.Value}點傷害";
-                break;
-            case EffecID.RemoveArmor:
-                word = $"移除敵人{effect.Value}點護甲";
-                break;
-            case EffecID.GainArmor:
-                word = $"獲得{effect.Value}點護甲";
-                break;
-            case EffecID.GetCard:
-                word = $"抽{effect.Value}張牌";
-                break;
-            case EffecID.RecoverHP:
-                word = $"回復{effect.Value}點血量";
-                break;
-            default:
-                break;
-        }
-        return word;
-    }
+    
     public static IEffect MakeEffect(EffecID effecID, int result)
     {
         IEffect effect=null;
@@ -98,7 +72,7 @@ public class Card
         string content=String.Empty;
         foreach (var effect in effects)
         {
-            content += CardFactory.GetEffectContent(effect);
+            content += effect.GetContent();
         }
         return content;
     }
