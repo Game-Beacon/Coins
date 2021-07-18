@@ -14,7 +14,6 @@ public class CardPreview : MonoBehaviour
         CardInfoSource.Intialize();
         cards=CardInfoSource.cards;
     }
-    int index=-1;
     
     private void OnDestroy()
     {

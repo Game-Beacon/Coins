@@ -77,4 +77,15 @@ public static class Tool
     {
         UnityTool.DeBug(inputString);
     }
+
+    internal static string AddWord(string word1, string word2, string punctuation=";")
+    {
+        if (string.IsNullOrEmpty(word1)|| string.IsNullOrEmpty(word2))
+        {
+            punctuation = "";
+        }
+        var value = string.IsNullOrEmpty(word1) ?"": word1;
+        var value2 = string.IsNullOrEmpty(word2) ?"": word2;
+        return value + punctuation + value2;
+    }
 }

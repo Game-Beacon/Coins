@@ -1,8 +1,9 @@
 using System;
+using System.Collections.Generic;
 using UniRx;
 public abstract class Character
 {
-    protected Character(Value hp, Value ep,int drawCountWhenYourTurn)
+    protected Character(Value hp, Value ep, int drawCountWhenYourTurn)
     {
         maxHP.Value = hp.MaxValue;
         this.hp.Value = hp.NowValue;
@@ -10,24 +11,32 @@ public abstract class Character
         this.ep.Value = ep.NowValue;
         drawCount.Value = drawCountWhenYourTurn;
     }
-
+    public string name;
 
     protected ReactiveProperty<int> maxHP { get; private set; } = new ReactiveProperty<int>();
     protected ReactiveProperty<int> hp { get; private set; } = new ReactiveProperty<int>();
     protected ReactiveProperty<int> maxEP { get; private set; } = new ReactiveProperty<int>();
-    protected ReactiveProperty<int> ep { get; private set; }=new ReactiveProperty<int>();
+    protected ReactiveProperty<int> ep { get; private set; } = new ReactiveProperty<int>();
     protected ReactiveProperty<int> drawCount { get; private set; } = new ReactiveProperty<int>(1);
-    protected ReactiveProperty<int> armor { get; private set; }=new ReactiveProperty<int>();
-    
+    protected ReactiveProperty<int> armor { get; private set; } = new ReactiveProperty<int>();
+
+    BuffControler buffControler;
+
     private CardsUI cardsUI;
     private Deck deck;
-
+    private Character enemy;
     public int Hp => hp.Value;
     public int Ep => ep.Value;
     public int DrawCountWhenYourTurn => drawCount.Value;
     public int Armor => armor.Value;
     public bool IsDead { get; private set; } = false;
-
+    public int AttackValue
+    {
+        get
+        {
+            return buffControler.GetAttackValue();
+        }
+    }
     public IDisposable SubscribeHP(Action<int> fuc)
     {
         return hp.Subscribe(fuc);
@@ -36,6 +45,17 @@ public abstract class Character
     {
         return ep.Subscribe(fuc);
     }
+
+    public void SetBuffController(Character enemy)
+    {
+        buffControler = new BuffControler(this, enemy);
+    }
+
+    internal void AddBuff(Buff buff)
+    {
+        buffControler.Add(buff);
+    }
+
     public IDisposable SubscribeArmor(Action<int> fuc)
     {
         return armor.Subscribe(fuc);
@@ -59,14 +79,14 @@ public abstract class Character
             cardsUI.SetCardAndReturnUniqueID(card, UISource.GetUIInfo(card.type));
         }
     }
+
     public void TryUseCard(Guid guid, Character target)
     {
         var isUseAble = CheckUseAble(guid);
-        if (!isUseAble)
+        if (isUseAble)
         {
-            return;
+            UseCard(guid, target);
         }
-        UseCard(guid, target);
     }
 
     private void UseCard(Guid guid, Character target)
@@ -111,8 +131,6 @@ public abstract class Character
         hp.Value = tempHp > maxHP.Value ? maxHP.Value : tempHp;
     }
 
-    
-
     public void SetArmor(int value)
     {
         armor.Value = value;
@@ -135,13 +153,98 @@ public abstract class Character
 
     internal void EndTurn()
     {
-        //throw new NotImplementedException();
+        buffControler.DoBuffTimeCount(RoundPeriod.end);
+        buffControler.DoBuffTimeCount(RoundPeriod.enemyStart);
     }
+
+    
 
     internal void StartTurn()
     {
-        //throw new NotImplementedException();
+        buffControler.DoBuffTimeCount(RoundPeriod.enemyEnd);
+        buffControler.DoBuffTimeCount(RoundPeriod.start);
     }
+}
+
+
+
+class BuffControler
+{
+    private Character user;
+    private Character enemy;
+    private List<Buff> buffs = new List<Buff>();
+
+    public int GetAttackValue()
+    {
+        int value = 0;
+        if (buffs.Exists(buff => buff.BuffID == BuffID.Rage))
+        {
+            value+= buffs.Find(buff => buff.BuffID == BuffID.Rage).Value;
+        }
+        if (buffs.Exists(buff => buff.BuffID == BuffID.Forzen))
+        {
+            value -= buffs.Find(buff => buff.BuffID == BuffID.Forzen).Value;
+        }
+        return value;
+    }
+
+
+    public BuffControler(Character user,Character enemy)
+    {
+        this.user = user;
+        this.enemy = enemy;
+    }
+    public void DoBuffTimeCount(RoundPeriod roundPeriod)
+    {
+        buffs.ForEach((buff) =>
+        {
+            if (buff.roundPeriod == roundPeriod)
+            {
+                buff.DoTimeCountAction(user, enemy);
+            }
+        });
+        buffs = buffs.FindAll(buff=>buff.Remove==false);
+    }
+
+
+    internal void Add(Buff buff)
+    {
+        switch (buff.BuffID)
+        {
+
+            case BuffID.Rage:
+                if (buffs.Exists(buff=>buff.BuffID==BuffID.Rage))
+                {
+                    buffs.Find(buff => buff.BuffID == BuffID.Rage).SetValue(buff.Value);
+                }
+                else
+                {
+                    buffs.Add(buff);
+                    ShowBuff(buff);
+                }
+                break;
+            case BuffID.Forzen:
+                if (buffs.Exists(buff => buff.BuffID == BuffID.Forzen))
+                {
+                    buffs.Find(buff => buff.BuffID == BuffID.Forzen).SetValue(buff.Value);
+                }
+                else
+                {
+                    buffs.Add(buff);
+                    ShowBuff(buff);
+                }
+                break;
+            default:
+                Tool.DeBug("wrong");
+                break;
+        }
+    }
+    private void ShowBuff(Buff buff)
+    {
+        string value = buff.PositiveBuff ? "GoodBuff" : "BadBuff";
+        Tool.DeBug($"{value}:{buff.GetTitle()}");
+    }
+
 }
 
 public struct Value
@@ -162,9 +265,8 @@ public struct Value
 
 public class Fakecharactor : Character
 {
-    public string name;
     public Fakecharactor():base(new Value(100), new Value(100),1) { }
-    public Fakecharactor(string name):base(new Value(100,100), new Value(100, 100),1) 
+    public Fakecharactor(string name):base(new Value(100,100), new Value(100, 100),3) 
     {
         this.name = name;
     }

@@ -14,7 +14,8 @@ public class Deck
 
     public Card AddHandCard()
     {
-        var card = GetNextCard();
+        //var card = GetNextCard();
+        var card = Card.TestCard();
         handCards.Add(card.guid,card);
         return card;
     }

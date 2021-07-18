@@ -21,6 +21,9 @@ public static class BattleSystem
         Enemy = new Fakecharactor("enemy");
         Enemy.SubscribeHP(CheckEnemyHP);
         Enemy.AddDeck(new Deck(deck));
+
+        Player.SetBuffController(Enemy);
+        Enemy.SetBuffController(Player);
     }
     private static void CheckPlayerHP(int value)
     {
@@ -75,11 +78,5 @@ public static class BattleSystem
     {
         var character = PlayerTurn ? Player : Enemy;
         character.EndTurn();
-    }
-    private static void DoActionStartBuff(Character character)
-    {
-    }
-    private static void DoActionEndBuff(Character character)
-    {
     }
 }
