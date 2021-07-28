@@ -30,13 +30,7 @@ public abstract class Character
     public int DrawCountWhenYourTurn => drawCount.Value;
     public int Armor => armor.Value;
     public bool IsDead { get; private set; } = false;
-    public int AttackValue
-    {
-        get
-        {
-            return buffControler.GetAttackValue();
-        }
-    }
+    
     public IDisposable SubscribeHP(Action<int> fuc)
     {
         return hp.Subscribe(fuc);
@@ -60,13 +54,10 @@ public abstract class Character
     {
         return armor.Subscribe(fuc);
     }
-
-
     public void SetUI(CardsUI ui)
     {
         cardsUI = ui;
     }
-
     public void AddOneTurnHandCards()
     {
         AddCards(DrawCountWhenYourTurn);
@@ -75,11 +66,25 @@ public abstract class Character
     {
         for (int i = 0; i < count; i++)
         {
+
             var card = deck.AddHandCard();
+            int value= buffControler.GetDragCardDamage(true);
+            MinusHp(value);
             cardsUI.SetCardAndReturnUniqueID(card, UISource.GetUIInfo(card.type));
         }
     }
+    public void AddAssignCards(int id)
+    {
 
+        var card = deck.AddAssignHandCard(id);
+        int value = buffControler.GetDragCardDamage(true);
+        MinusHp(value);
+        cardsUI.SetCardAndReturnUniqueID(card, UISource.GetUIInfo(card.type));
+    }
+    public void CountDamage(int value)
+    {
+        buffControler.CheckBomb(value);
+    }
     public void TryUseCard(Guid guid, Character target)
     {
         var isUseAble = CheckUseAble(guid);
@@ -149,7 +154,14 @@ public abstract class Character
         }
         return Ep >= cost;
     }
-
+    public int GetAttackValue(int value, bool use=true)
+    {
+        return buffControler.GetAttackValue(value,use);
+    }
+    public int GetMagicAttackValue(int value, bool use = true)
+    {
+        return buffControler.GetMagicAttackValue(value, use);
+    }
 
     internal void EndTurn()
     {
@@ -164,87 +176,30 @@ public abstract class Character
         buffControler.DoBuffTimeCount(RoundPeriod.enemyEnd);
         buffControler.DoBuffTimeCount(RoundPeriod.start);
     }
-}
 
-
-
-class BuffControler
-{
-    private Character user;
-    private Character enemy;
-    private List<Buff> buffs = new List<Buff>();
-
-    public int GetAttackValue()
+    internal int GetDefendValue()
     {
-        int value = 0;
-        if (buffs.Exists(buff => buff.BuffID == BuffID.Rage))
-        {
-            value+= buffs.Find(buff => buff.BuffID == BuffID.Rage).Value;
-        }
-        if (buffs.Exists(buff => buff.BuffID == BuffID.Forzen))
-        {
-            value -= buffs.Find(buff => buff.BuffID == BuffID.Forzen).Value;
-        }
-        return value;
+        return 0;
     }
 
-
-    public BuffControler(Character user,Character enemy)
+    internal void SetChangCard(Func<Card> changFunction)
     {
-        this.user = user;
-        this.enemy = enemy;
+        deck.ChangeCard = changFunction;
     }
-    public void DoBuffTimeCount(RoundPeriod roundPeriod)
+    internal void RemoveChangCard()
     {
-        buffs.ForEach((buff) =>
-        {
-            if (buff.roundPeriod == roundPeriod)
-            {
-                buff.DoTimeCountAction(user, enemy);
-            }
-        });
-        buffs = buffs.FindAll(buff=>buff.Remove==false);
+        deck.ChangeCard = null;
     }
 
-
-    internal void Add(Buff buff)
+    internal void RemoveBuff(bool removeGoodBuff)
     {
-        switch (buff.BuffID)
-        {
-
-            case BuffID.Rage:
-                if (buffs.Exists(buff=>buff.BuffID==BuffID.Rage))
-                {
-                    buffs.Find(buff => buff.BuffID == BuffID.Rage).SetValue(buff.Value);
-                }
-                else
-                {
-                    buffs.Add(buff);
-                    ShowBuff(buff);
-                }
-                break;
-            case BuffID.Forzen:
-                if (buffs.Exists(buff => buff.BuffID == BuffID.Forzen))
-                {
-                    buffs.Find(buff => buff.BuffID == BuffID.Forzen).SetValue(buff.Value);
-                }
-                else
-                {
-                    buffs.Add(buff);
-                    ShowBuff(buff);
-                }
-                break;
-            default:
-                Tool.DeBug("wrong");
-                break;
-        }
-    }
-    private void ShowBuff(Buff buff)
-    {
-        string value = buff.PositiveBuff ? "GoodBuff" : "BadBuff";
-        Tool.DeBug($"{value}:{buff.GetTitle()}");
+        buffControler.RemoveBuff(removeGoodBuff);
     }
 
+    internal void RemoveBuff(EffecID rage)
+    {
+        buffControler.RemoveBuff(rage);
+    }
 }
 
 public struct Value

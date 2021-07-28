@@ -38,4 +38,7 @@ public class BattlePresenter : MonoBehaviour
         enemyEp.Dispose();
         endButton.onClick.RemoveListener(BattleSystem.ChangeTurn);
     }
+
+
+
 }

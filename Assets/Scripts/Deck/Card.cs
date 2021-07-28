@@ -11,24 +11,27 @@ using UnityEngine.UI;
 public static class CardFactory
 {
     
-    public static CardAction MakeEffect(Action effecID, int result)
+    public static IEffect MakeEffect(EffecID effecID, int result)
     {
-        CardAction effect=null;
+        IEffect effect=null;
         switch (effecID)
         {
-            case Action.Damage:
+            case EffecID.Damage:
                 effect = new Damage{Value = result};
                 break;
-            case  Action.GainArmor:
+            case EffecID.MagicDamage:
+                effect = new MagicDamage { Value = result };
+                break;
+            case EffecID.GainArmor:
                 effect = new GainArmor{Value = result};
                 break;
-            case  Action.RemoveArmor :
+            case EffecID.RemoveArmor :
                 effect = new RemoveArmor{Value = result};
                 break;
-            case Action.RecoverHP:
+            case EffecID.RecoverHP:
                 effect = new RecoverHP { Value = result };
                 break;
-            case Action.GetCard:
+            case EffecID.GetCard:
                 effect = new AddHandCard{ Value = result };
                 break;
             default:
@@ -47,8 +50,7 @@ public class Card
     private int id;
     public Type type;
     public int cost;
-    public CardAction cardAction;
-    //public List<CardAction> effects=new List<CardAction>();
+    public IEffect cardAction;
     public Guid guid { get; private set; } = new Guid();
     public Card() { }
     public Card(string[] xmlInfo)
@@ -59,18 +61,18 @@ public class Card
         int.TryParse(xmlInfo[index++], out cost);
 
 
-        Action effecID = Tool.Parse<Action>(xmlInfo[index++]);
+        var effecID = Tool.Parse<EffecID>(xmlInfo[index++]);
         int.TryParse(xmlInfo[index++], out int value);
 
 
         cardAction=CardFactory.MakeEffect(effecID, value); ;
-        CardAction tempEffect = cardAction;
-        CardAction nextEffect ;
+        IEffect tempEffect = cardAction;
+        IEffect nextEffect ;
         while (index<xmlInfo.Length-1)
         {
-            effecID = Tool.Parse<Action>(xmlInfo[index++]);
+            effecID = Tool.Parse<EffecID>(xmlInfo[index++]);
             int.TryParse(xmlInfo[index++],out value);
-            if (effecID!=Action.None)
+            if (effecID!= EffecID.None)
             {
                 nextEffect = CardFactory.MakeEffect(effecID,value);
                 tempEffect.SetNextAction(nextEffect);
@@ -78,12 +80,14 @@ public class Card
             }
         }
     }
-
-    public static Card TestCard()
+    public static Card TestCard(List<IEffect> buffs)
     {
-        CardAction head = CardFactory.MakeEffect(Action.Damage,5);
-        CardAction nowEffect = head;
-        setAction(new BuffContainer(new forzen(false, RoundPeriod.end,3)));
+        IEffect head = CardFactory.MakeEffect(EffecID.Damage,5);
+        IEffect nowEffect = head;
+        foreach (var buff in buffs)
+        {
+            setAction(buff);
+        }
         return new Card()
         {
             guid = Guid.NewGuid(),
@@ -92,7 +96,7 @@ public class Card
             cost = 1,
             cardAction = head
         };
-        void setAction(CardAction effect)
+        void setAction(IEffect effect)
         {
             nowEffect.SetNextAction(effect);
             nowEffect = effect;
@@ -108,7 +112,7 @@ public class Card
     }
     public void DoAction(Character user, Character target)
     {
-        cardAction.Do(user,target);
+        cardAction.Cast(user,target);
     }
 
     public Card DeepClone()

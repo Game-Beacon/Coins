@@ -79,4 +79,9 @@ public static class BattleSystem
         var character = PlayerTurn ? Player : Enemy;
         character.EndTurn();
     }
+
+    internal static void CountDamage(Character user, int value)
+    {
+        user.CountDamage(value);
+    }
 }
