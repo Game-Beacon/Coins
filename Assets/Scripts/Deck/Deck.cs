@@ -12,13 +12,7 @@ public class Deck
     private Queue<Card> deckPool=new Queue<Card>();
     private Dictionary<Guid,Card> handCards = new Dictionary<Guid, Card>();
     public Dictionary<Guid, Card> HandCards => handCards;
-    public Card AddHandCard()
-    {
-        var card = GetNextCard();
-        handCards.Add(card.guid,card);
-        return card;
-    }
-    public Card AddAssignHandCard(int id)
+    public Card AddHandCard(int id)
     {
         var card = GetCard(id);
         handCards.Add(card.guid, card);
@@ -27,7 +21,16 @@ public class Deck
 
     private Card GetCard(int id)
     {
-        throw new NotImplementedException();
+        if (id==-1)
+        {
+            var card = GetNextCard();
+            handCards.Add(card.guid, card);
+            return card;
+        }
+        else
+        {
+            throw new Exception();
+        }
     }
 
     private Card GetNextCard()
@@ -36,7 +39,7 @@ public class Deck
         {
             ReSetDeckPool();
         }
-        List<IEffect> buffs = new List<IEffect>() { new Rage(true, RoundPeriod.end, 2),new RemoveRage()};
+        List<IEffect> buffs = new List<IEffect>() { new AddMgicDamage(true, RoundPeriod.end,5)};
         //List<IEffect> buffs = new List<IEffect>() { new DamageOnDrag(true, RoundPeriod.end, 2),new Forzen(true,RoundPeriod.end, 2),new Bomb(true, RoundPeriod.end, 2) ,new RemoveBuff(false)};
         Card card = ChangeCard?.Invoke() ?? Card.TestCard(buffs);
         //Card card = ChangeCard?.Invoke() ?? deckPool.Dequeue();

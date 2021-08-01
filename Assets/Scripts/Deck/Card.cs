@@ -11,28 +11,33 @@ using UnityEngine.UI;
 public static class CardFactory
 {
     
-    public static IEffect MakeEffect(EffecID effecID, int result)
+    public static IEffect MakeEffect(EffecID effecID, int value)
     {
         IEffect effect=null;
         switch (effecID)
         {
             case EffecID.Damage:
-                effect = new Damage{Value = result};
+                effect = new Damage(value);
                 break;
             case EffecID.MagicDamage:
-                effect = new MagicDamage { Value = result };
+                effect = new Damage(value,true);
                 break;
             case EffecID.GainArmor:
-                effect = new GainArmor{Value = result};
+                effect = new GainArmor(value);
                 break;
             case EffecID.RemoveArmor :
-                effect = new RemoveArmor{Value = result};
+                effect = new RemoveArmor(value);
                 break;
             case EffecID.RecoverHP:
-                effect = new RecoverHP { Value = result };
+                effect = new RecoverHP(value);
                 break;
-            case EffecID.GetCard:
-                effect = new AddHandCard{ Value = result };
+            case EffecID.AddCard:
+                List<int> ids = new List<int>();
+                for (int i = 0; i < value; i++)
+                {
+                    ids.Add(-1);
+                }
+                effect = new AddCard(ids);
                 break;
             default:
                 Tool.DeBugWarning($"{effecID} is not implemented");
@@ -82,7 +87,7 @@ public class Card
     }
     public static Card TestCard(List<IEffect> buffs)
     {
-        IEffect head = CardFactory.MakeEffect(EffecID.Damage,5);
+        IEffect head = CardFactory.MakeEffect(EffecID.MagicDamage,5);
         IEffect nowEffect = head;
         foreach (var buff in buffs)
         {

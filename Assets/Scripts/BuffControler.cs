@@ -39,7 +39,7 @@ class BuffControler
 
     private void RemoveBome()
     {
-        var index = buffs.FindIndex((buff)=>buff.effecID==EffecID.Bomb);
+        var index = buffs.FindIndex((buff)=>buff.ID==EffecID.Bomb);
         if (index!=-1)
         {
             buffs[index].Remove=true;
@@ -53,7 +53,7 @@ class BuffControler
     }
     private int GetBuffInvokeValue(int value, EffecID effecID,bool use)
     {
-        var index = buffs.FindIndex((buff) => buff.effecID == effecID);
+        var index = buffs.FindIndex((buff) => buff.ID == effecID);
         if (index != -1)
         {
             value = buffs[index].Invoke(value, use);
@@ -88,7 +88,7 @@ class BuffControler
 
     internal void Add(Buff buff)
     {
-        var index= buffs.FindIndex((buffInList)=>buffInList.effecID== buff.effecID);
+        var index= buffs.FindIndex((buffInList)=>buffInList.ID== buff.ID);
         if (index==-1 || !buffs[index].IsOverlay)
         {
             buffs.Add(buff);
@@ -125,7 +125,7 @@ class BuffControler
 
     internal void RemoveBuff(EffecID rage)
     {
-        var index= buffs.FindIndex((buff) => buff.effecID == rage);
+        var index= buffs.FindIndex((buff) => buff.ID == rage);
         if (index!=-1)
         {
             buffs[index].Remove = true;

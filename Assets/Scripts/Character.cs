@@ -62,25 +62,26 @@ public abstract class Character
     {
         AddCards(DrawCountWhenYourTurn);
     }
-    public void AddCards(int count)
+    public void AddCards(params int[] ids)
     {
-        for (int i = 0; i < count; i++)
+        foreach (var id in ids)
         {
-
-            var card = deck.AddHandCard();
-            int value= buffControler.GetDragCardDamage(true);
+            var card = deck.AddHandCard(id);
+            int value = buffControler.GetDragCardDamage(true);
             MinusHp(value);
             cardsUI.SetCardAndReturnUniqueID(card, UISource.GetUIInfo(card.type));
         }
     }
     public void AddAssignCards(int id)
     {
-
-        var card = deck.AddAssignHandCard(id);
+        var card = deck.AddHandCard(id);
         int value = buffControler.GetDragCardDamage(true);
         MinusHp(value);
         cardsUI.SetCardAndReturnUniqueID(card, UISource.GetUIInfo(card.type));
     }
+
+
+
     public void CountDamage(int value)
     {
         buffControler.CheckBomb(value);
@@ -93,12 +94,29 @@ public abstract class Character
             UseCard(guid, target);
         }
     }
-
+    List<Buff> DoSomethingToOther = new List<Buff>();
     private void UseCard(Guid guid, Character target)
     {
         Card card = GetCard(guid);
         SetEP(Ep - card.cost);
-        card.DoAction(this, target);
+
+
+        if (DoSomethingToOther.Count!=0)
+        {
+            if (DoSomethingToOther[0].ID == EffecID.CancelNextCard)
+            {
+
+            }
+            else if (DoSomethingToOther[0].ID == EffecID.RubNextCard)
+            {
+                card.DoAction(target, this);
+            }
+            DoSomethingToOther.RemoveAt(0);
+        }
+        else
+        {
+            card.DoAction(this, target);
+        }
         deck.RemoveHandCard(guid);
         cardsUI.RecycleCard(guid);
     }
@@ -154,13 +172,16 @@ public abstract class Character
         }
         return Ep >= cost;
     }
-    public int GetAttackValue(int value, bool use=true)
+    public int GetAttackValue(int value, EffecID effecID,bool use=true)
     {
-        return buffControler.GetAttackValue(value,use);
-    }
-    public int GetMagicAttackValue(int value, bool use = true)
-    {
-        return buffControler.GetMagicAttackValue(value, use);
+        if (effecID==EffecID.Damage)
+        {
+            return buffControler.GetAttackValue(value,use);
+        }
+        else
+        {
+            return buffControler.GetMagicAttackValue(value, use);
+        }
     }
 
     internal void EndTurn()

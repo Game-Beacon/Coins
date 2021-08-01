@@ -11,12 +11,9 @@ public enum EffecID
     RemoveArmor,
     GainArmor,
     RecoverHP,
-    GetCard,
-    RecoverEP,
     AddCard,
-    AddAssignCard,
+    RecoverEP,
     RemoveBuff,
-    RemoveRage,
     Rage,
     AddMgicDamage,
     Frozen,
@@ -24,7 +21,9 @@ public enum EffecID
     ChangeCard,
     Poison,
     DamageOnDrag,
-    Bomb
+    Bomb,
+    CancelNextCard,
+    RubNextCard
 }
 public enum BuffID
 {

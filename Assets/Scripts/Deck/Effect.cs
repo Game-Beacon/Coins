@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 public interface IEffect
 {
-    EffecID effecID { get; }
+    EffecID ID { get; }
     string GetContent();
     void Cast(Character user, Character target);
     void SetNextAction(IEffect action);
@@ -12,9 +12,8 @@ public interface IEffect
 public abstract class Effect : IEffect
 {
     protected IEffect nextAction;
-    public int Value { get; set; }
 
-    public abstract EffecID effecID { get; }
+    public abstract EffecID ID { get; }
 
     public void Cast(Character user, Character target)
     {
@@ -35,6 +34,191 @@ public abstract class Effect : IEffect
         nextAction = action;
     }
 }
+[Serializable]
+public class Damage : Effect
+{
+    int damage;
+    public Damage(int value, bool magicDamgae = false)
+    {
+        damage = value;
+        if (magicDamgae)
+        {
+            damageID = EffecID.MagicDamage;
+        }
+        else
+        {
+            damageID = EffecID.Damage;
+        }
+    }
+    public override EffecID ID => damageID;
+    EffecID damageID;
+    protected override void DoAction(Character user, Character target)
+    {
+        int value = user.GetAttackValue(damage, ID) + target.GetDefendValue();
+        BattleSystem.CountDamage(user, value);
+        target.MinusHp(value);
+    }
+
+    protected override string GetEffectContent()
+    {
+        if (damageID == EffecID.MagicDamage)
+        {
+            return $"造成{damage}點魔法傷害";
+        }
+        else
+        {
+            return $"造成{damage}點傷害";
+        }
+    }
+}
+
+[Serializable]
+public class RemoveArmor : Effect
+{
+    int removeArmor;
+    public RemoveArmor(int value)
+    {
+        removeArmor = value;
+    }
+
+    public override EffecID ID => EffecID.RemoveArmor;
+
+    protected override void DoAction(Character user, Character target)
+    {
+        int tempvalue = target.Armor - removeArmor;
+        target.SetArmor(tempvalue);
+    }
+
+    protected override string GetEffectContent()
+    {
+        return $"移除敵人{removeArmor }點護甲";
+    }
+}
+[Serializable]
+public class GainArmor : Effect
+{
+    int armor;
+    public GainArmor(int value)
+    {
+        armor = value;
+    }
+
+    public override EffecID ID => EffecID.GainArmor;
+
+    protected override void DoAction(Character user, Character target)
+    {
+        int tempvalue = target.Armor + armor;
+        target.SetArmor(tempvalue);
+    }
+
+    protected override string GetEffectContent()
+    {
+        return $"獲得{armor}點護甲";
+    }
+}
+[Serializable]
+public class RecoverHP : Effect
+{
+    int heal;
+    public RecoverHP(int value)
+    {
+        heal = value;
+    }
+
+    public override EffecID ID => EffecID.RecoverHP;
+
+    protected override void DoAction(Character user, Character target)
+    {
+        user.AddHp(heal);
+    }
+
+    protected override string GetEffectContent()
+    {
+        return $"回復{heal}點血量";
+    }
+}
+[Serializable]
+public class RecoverEP : Effect
+{
+    int recoverEP;
+    public override EffecID ID => EffecID.RecoverEP;
+
+    protected override void DoAction(Character user, Character target)
+    {
+        user.SetEP(user.Ep + recoverEP);
+    }
+
+    protected override string GetEffectContent()
+    {
+        return $"回復{recoverEP}點魔力";
+    }
+}
+[Serializable]
+public class AddCard : Effect
+{
+    int addCardNumber;
+    public AddCard(List<int> ids)
+    {
+        this.ids = ids;
+        addCardNumber = ids.Count;
+    }
+    public override EffecID ID => EffecID.AddCard;
+    List<int> ids;
+    protected override void DoAction(Character user, Character target)
+    {
+        int[] array = new int[ids.Count];
+        ids.CopyTo(array);
+        user.AddCards();
+    }
+
+    protected override string GetEffectContent()
+    {
+        return $"抽{addCardNumber}張牌";
+    }
+}
+
+public class RemoveBuff : Effect
+{
+    public RemoveBuff(bool removeGoodBuff)
+    {
+        random = true;
+        this.removeGoodBuff = removeGoodBuff;
+    }
+    Action action;
+    public RemoveBuff(EffecID effecID)
+    {
+        removeID = effecID;
+    }
+    public override EffecID ID => EffecID.RemoveBuff;
+    EffecID removeID;
+    bool random;
+    bool removeGoodBuff;
+    protected override void DoAction(Character user, Character target)
+    {
+        if (random)
+        {
+            user.RemoveBuff(removeGoodBuff);
+        }
+        else
+        {
+            user.RemoveBuff(removeID);
+        }
+    }
+
+    protected override string GetEffectContent()
+    {
+        if (random)
+        {
+            return "移除buff";
+        }
+        else
+        {
+            return $"移除{removeID}buff";
+        }
+    }
+}
+
+
 
 [Serializable]
 public abstract class Buff : IEffect
@@ -43,16 +227,16 @@ public abstract class Buff : IEffect
     protected Character owener;
     protected Character enemy;
 
-    public Buff(bool setOnUser, RoundPeriod roundPeriod)
+    public Buff(bool targetIsUser, RoundPeriod roundPeriod)
     {
-        SetOnUser = setOnUser;
-        this.RoundPeriod = roundPeriod;
+        this.targetIsUser = targetIsUser;
+        RoundPeriod = roundPeriod;
     }
     public RoundPeriod RoundPeriod { get; private set; }
     public abstract bool PositiveBuff { get; }
-    private bool SetOnUser { get; set; }
+    private bool targetIsUser { get; set; }
     public bool Remove { get; set; }
-    public abstract EffecID effecID { get; }
+    public abstract EffecID ID { get; }
     public abstract bool IsOverlay { get; }
     public abstract int Value { get; }
     public void Overlay(int value)
@@ -62,10 +246,10 @@ public abstract class Buff : IEffect
     protected abstract void OverlayAction(int value);
     public void Cast(Character user, Character enemy)
     {
-        owener = SetOnUser ? user : enemy;
-        this.enemy = SetOnUser ? enemy : user;
+        owener = targetIsUser ? user : enemy;
+        this.enemy = targetIsUser ? enemy : user;
         owener.AddBuff(this);
-        Cast();
+        CastAction();
         nextAction?.Cast(user, enemy);
     }
     public void DoTimeCountAction(RoundPeriod roundPeriod)
@@ -77,8 +261,7 @@ public abstract class Buff : IEffect
         }
     }
     protected abstract void CountTime(RoundPeriod roundPeriod);
-    
-    protected virtual void Cast() { }
+    protected virtual void CastAction() { }
     protected virtual void Reverse() { }
     public string GetContent()
     {
@@ -102,17 +285,17 @@ public class AddDamage : Buff
 {
     public AddDamage(bool setOnUser, RoundPeriod roundPeriod, int value) : base(setOnUser, roundPeriod)
     {
-        this.value = value;
+        this.addDamageValue = value;
     }
 
     public override bool PositiveBuff => true;
 
-    public override EffecID effecID => EffecID.AddDamage;
+    public override EffecID ID => EffecID.AddDamage;
 
     public override bool IsOverlay => true;
 
-    public override int Value => value;
-    private int value;
+    public override int Value => addDamageValue;
+    private int addDamageValue;
 
 
     List<int> overlayValue = new List<int>();
@@ -132,7 +315,7 @@ public class AddDamage : Buff
     }
     public override int Invoke(int attackValue, bool use)
     {
-        int tempvalue = attackValue + value;
+        int tempvalue = attackValue + addDamageValue;
         foreach (var value in overlayValue)
         {
             if (value == -1)
@@ -166,7 +349,7 @@ public class AddDamageInOneGame : Buff
 
     public override bool PositiveBuff => true;
 
-    public override EffecID effecID => EffecID.AddDamage;
+    public override EffecID ID => EffecID.AddDamage;
 
     public override bool IsOverlay => true;
 
@@ -174,7 +357,7 @@ public class AddDamageInOneGame : Buff
     private int value;
 
 
-    
+
     public override string GetTitle()
     {
         return "AddDamageInOneGame";
@@ -182,7 +365,7 @@ public class AddDamageInOneGame : Buff
 
     protected override void CountTime(RoundPeriod roundPeriod)
     {
-        
+
     }
 
     protected override string GetBuffContent()
@@ -197,12 +380,12 @@ public class AddDamageInOneGame : Buff
 
     protected override void OverlayAction(int value)
     {
-        this.value+=value;
+        this.value += value;
     }
 }
 public class Rage : Buff
 {
-    public override EffecID effecID => EffecID.Rage;
+    public override EffecID ID => EffecID.Rage;
 
     public override bool IsOverlay => true;
 
@@ -240,7 +423,7 @@ public class Rage : Buff
 }
 public class AddMgicDamage : Buff
 {
-    public override EffecID effecID => EffecID.AddMgicDamage;
+    public override EffecID ID => EffecID.AddMgicDamage;
 
     public override bool IsOverlay => true;
 
@@ -279,7 +462,7 @@ public class Forzen : Buff
 {
     private int value { get; set; }
 
-    public override EffecID effecID => EffecID.Frozen;
+    public override EffecID ID => EffecID.Frozen;
 
     public override bool IsOverlay => true;
 
@@ -335,7 +518,7 @@ public class DamageOnDrag : Buff
 {
     private int damage { get; set; }
 
-    public override EffecID effecID => EffecID.DamageOnDrag;
+    public override EffecID ID => EffecID.DamageOnDrag;
 
     public override bool IsOverlay => true;
 
@@ -385,24 +568,24 @@ public class Bomb : Buff
     }
     public override bool PositiveBuff => false;
 
-    public override EffecID effecID => EffecID.Bomb;
+    public override EffecID ID => EffecID.Bomb;
 
     public override bool IsOverlay => false;
 
     public override int Value => turns;
     int turns;
-    int damgaeHaveToDo=5;
+    int damgaeHaveToDo = 5;
     public override string GetTitle()
     {
         return "Bomb";
     }
     protected override void CountTime(RoundPeriod roundPeriod)
     {
-        if (roundPeriod==RoundPeriod)
+        if (roundPeriod == RoundPeriod)
         {
             turns--;
         }
-        if (turns<=0)
+        if (turns <= 0)
         {
             owener.MinusHp(damgaeHaveToDo);
             Remove = true;
@@ -434,7 +617,7 @@ public class ChangeCard : Buff
     }
     public override bool PositiveBuff => true;
 
-    public override EffecID effecID => EffecID.ChangeCard;
+    public override EffecID ID => EffecID.ChangeCard;
 
     public override bool IsOverlay => true;
 
@@ -445,7 +628,7 @@ public class ChangeCard : Buff
     {
         return "ChangeCard";
     }
-    protected override void Cast()
+    protected override void CastAction()
     {
         owener.SetChangCard(ChangFunction);
     }
@@ -461,7 +644,7 @@ public class ChangeCard : Buff
     }
     protected override void CountTime(RoundPeriod roundPeriod)
     {
-        if (roundPeriod==RoundPeriod)
+        if (roundPeriod == RoundPeriod)
         {
             owener.RemoveChangCard();
             Remove = true;
@@ -484,14 +667,14 @@ public class ChangeCard : Buff
 
 public class Poison : Buff
 {
-    public Poison(bool setOnUser, RoundPeriod roundPeriod, int damagePercent,int turnNumber) : base(setOnUser, roundPeriod)
+    public Poison(bool setOnUser, RoundPeriod roundPeriod, int damagePercent, int turnNumber) : base(setOnUser, roundPeriod)
     {
         this.damagePercent = damagePercent;
         this.turnNumber = turnNumber;
     }
     public override bool PositiveBuff => false;
 
-    public override EffecID effecID => EffecID.Poison;
+    public override EffecID ID => EffecID.Poison;
 
     public override bool IsOverlay => true;
 
@@ -506,13 +689,13 @@ public class Poison : Buff
 
     protected override void CountTime(RoundPeriod roundPeriod)
     {
-        if (roundPeriod==RoundPeriod)
+        if (roundPeriod == RoundPeriod)
         {
             int damage = owener.Hp * 5 / 100;
             owener.MinusHp(damage);
             turnNumber--;
         }
-        if (turnNumber<=0)
+        if (turnNumber <= 0)
         {
             Remove = true;
         }
@@ -526,175 +709,5 @@ public class Poison : Buff
     protected override void OverlayAction(int value)
     {
         turnNumber = value;
-    }
-}
-[Serializable]
-public class Damage : Effect
-{
-    public override EffecID effecID => EffecID.Damage;
-
-    protected override void DoAction(Character user, Character target)
-    {
-        int value = user.GetAttackValue(Value) + target.GetDefendValue();
-        BattleSystem.CountDamage(user,value);
-        target.MinusHp(value);
-    }
-
-    protected override string GetEffectContent()
-    {
-        return $"造成{Value}點傷害";
-    }
-}
-
-[Serializable]
-public class MagicDamage : Effect
-{
-    public override EffecID effecID => EffecID.MagicDamage;
-
-    protected override void DoAction(Character user, Character target)
-    {
-        int value = user.GetMagicAttackValue(Value) + target.GetDefendValue();
-        BattleSystem.CountDamage(user, value);
-        target.MinusHp(value);
-    }
-
-    protected override string GetEffectContent()
-    {
-        return $"造成{Value}點魔法傷害";
-    }
-}
-[Serializable]
-public class RemoveArmor : Effect
-{
-    public override EffecID effecID => EffecID.RemoveArmor;
-
-    protected override void DoAction(Character user, Character target)
-    {
-        int tempvalue = target.Armor - Value;
-        target.SetArmor(tempvalue);
-    }
-
-    protected override string GetEffectContent()
-    {
-        return $"移除敵人{Value}點護甲";
-    }
-}
-[Serializable]
-public class GainArmor : Effect
-{
-    public override EffecID effecID => EffecID.GainArmor;
-
-    protected override void DoAction(Character user, Character target)
-    {
-        int tempvalue = target.Armor + Value;
-        target.SetArmor(tempvalue);
-    }
-
-    protected override string GetEffectContent()
-    {
-        return $"獲得{Value}點護甲";
-    }
-}
-[Serializable]
-public class RecoverHP : Effect
-{
-    public override EffecID effecID => EffecID.RecoverHP;
-
-    protected override void DoAction(Character user, Character target)
-    {
-        user.AddHp(Value);
-    }
-
-    protected override string GetEffectContent()
-    {
-        return $"回復{Value}點血量";
-    }
-}
-[Serializable]
-public class RecoverEP : Effect
-{
-    public override EffecID effecID => EffecID.RecoverEP;
-
-    protected override void DoAction(Character user, Character target)
-    {
-        user.AddHp(Value);
-    }
-
-    protected override string GetEffectContent()
-    {
-        return $"回復{Value}點魔力";
-    }
-}
-[Serializable]
-public class AddHandCard : Effect
-{
-    public override EffecID effecID => EffecID.AddCard;
-
-    protected override void DoAction(Character user, Character target)
-    {
-        user.AddCards(Value);
-    }
-
-    protected override string GetEffectContent()
-    {
-        return $"抽{Value}張牌";
-    }
-}
-public class AddAssignCard : Effect
-{
-    public AddAssignCard(List<int> ids)
-    {
-        this.ids = ids;
-        Value = ids.Count;
-    }
-    public override EffecID effecID => EffecID.AddAssignCard;
-    List<int> ids;
-    protected override void DoAction(Character user, Character target)
-    {
-        foreach (var id in ids)
-        {
-            user.AddAssignCards(id);
-        }
-    }
-
-    protected override string GetEffectContent()
-    {
-        return $"抽{Value}張牌";
-    }
-}
-
-public class RemoveBuff : Effect
-{
-    public RemoveBuff(bool removeGoodBuff)
-    {
-        this.removeGoodBuff = removeGoodBuff;
-    }
-    public override EffecID effecID => EffecID.RemoveBuff;
-
-    bool removeGoodBuff;
-    protected override void DoAction(Character user, Character target)
-    {
-        user.RemoveBuff(removeGoodBuff);
-    }
-
-    protected override string GetEffectContent()
-    {
-        return "移除buff";
-    }
-}
-
-public class RemoveRage : Effect
-{
-    public override EffecID effecID => EffecID.RemoveRage;
-
-    bool removeGoodBuff;
-    protected override void DoAction(Character user, Character target)
-    {
-        user.RemoveBuff(EffecID.Rage);
-    }
-
-    protected override string GetEffectContent()
-    {
-        return "移除Ragebuff";
     }
 }
