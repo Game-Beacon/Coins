@@ -168,7 +168,7 @@ public class AddCard : Effect
     {
         int[] array = new int[ids.Count];
         ids.CopyTo(array);
-        user.AddCards();
+        user.AddCards(array);
     }
 
     protected override string GetEffectContent()
@@ -217,6 +217,20 @@ public class RemoveBuff : Effect
         }
     }
 }
+public class InvokeBigMagiic : Effect
+{
+    public override EffecID ID => EffecID.InvokeBigMagiic;
+
+    protected override void DoAction(Character user, Character target)
+    {
+        user.InvokeBigMagiic();
+    }
+
+    protected override string GetEffectContent()
+    {
+        throw new NotImplementedException();
+    }
+}
 
 
 
@@ -224,9 +238,9 @@ public class RemoveBuff : Effect
 public abstract class Buff : IEffect
 {
     protected IEffect nextAction;
-    protected Character owener;
+    public Character owener { get; private set; }
     protected Character enemy;
-
+     
     public Buff(bool targetIsUser, RoundPeriod roundPeriod)
     {
         this.targetIsUser = targetIsUser;
@@ -239,6 +253,8 @@ public abstract class Buff : IEffect
     public abstract EffecID ID { get; }
     public abstract bool IsOverlay { get; }
     public abstract int Value { get; }
+    public Guid Guid { get; set; }
+
     public void Overlay(int value)
     {
         OverlayAction(value);
@@ -275,7 +291,6 @@ public abstract class Buff : IEffect
     {
         nextAction = action;
     }
-
     public virtual int Invoke(int value, bool use)
     {
         return value;
@@ -295,7 +310,7 @@ public class AddDamage : Buff
     public override bool IsOverlay => true;
 
     public override int Value => addDamageValue;
-    private int addDamageValue;
+    protected int addDamageValue;
 
 
     List<int> overlayValue = new List<int>();
@@ -311,7 +326,7 @@ public class AddDamage : Buff
 
     protected override string GetBuffContent()
     {
-        return "";
+        return "增加本回合下次傷害";
     }
     public override int Invoke(int attackValue, bool use)
     {
@@ -340,23 +355,14 @@ public class AddDamage : Buff
     }
 }
 
-public class AddDamageInOneGame : Buff
+public class AddDamageInOneGame : AddDamage
 {
-    public AddDamageInOneGame(bool setOnUser, RoundPeriod roundPeriod, int value) : base(setOnUser, roundPeriod)
+    public AddDamageInOneGame(bool setOnUser, RoundPeriod roundPeriod, int value) : base(setOnUser, roundPeriod,value)
     {
-        this.value = value;
     }
-
-    public override bool PositiveBuff => true;
-
-    public override EffecID ID => EffecID.AddDamage;
+    public override EffecID ID => EffecID.AddDamageInOneGame;
 
     public override bool IsOverlay => true;
-
-    public override int Value => value;
-    private int value;
-
-
 
     public override string GetTitle()
     {
@@ -374,13 +380,13 @@ public class AddDamageInOneGame : Buff
     }
     public override int Invoke(int attackValue, bool use)
     {
-        int tempvalue = attackValue + value;
+        int tempvalue = attackValue + addDamageValue;
         return tempvalue;
     }
 
     protected override void OverlayAction(int value)
     {
-        this.value += value;
+        this.addDamageValue += value;
     }
 }
 public class Rage : Buff
@@ -711,3 +717,160 @@ public class Poison : Buff
         turnNumber = value;
     }
 }
+public class BigMagicContainer : Buff
+{
+    public BigMagicContainer(bool setOnUser, RoundPeriod roundPeriod,int id) : base(setOnUser, roundPeriod)
+    {
+        bigMagic = AddBigMagic(id);
+    }
+    public override bool PositiveBuff => true;
+
+    public override EffecID ID => EffecID.BigMagic;
+
+    public override bool IsOverlay => true;
+
+    public override int Value => bigMagic.endTurn;
+
+    BigMagic bigMagic;
+    public override string GetTitle()
+    {
+        return bigMagic.Title();
+    }
+
+    protected override void CountTime(RoundPeriod roundPeriod)
+    {
+        if (RoundPeriod==roundPeriod)
+        {
+            bigMagic.countTimeAction(roundPeriod, BattleSystem.GetUseMagic());
+        }
+        if (bigMagic.endTurn<=0)
+        {
+            Remove = true;
+        }
+    }
+    protected override void CastAction()
+    {
+        bigMagic.SetOwner(owener,enemy);
+    }
+    protected override string GetBuffContent()
+    {
+        return bigMagic.Content();
+    }
+
+    protected override void OverlayAction(int value)
+    {
+        bigMagic = AddBigMagic(value);
+        bigMagic.SetOwner(owener,enemy);
+    }
+
+    public override int Invoke(int value, bool use)
+    {
+        if (use)
+        {
+            bigMagic.DoDamage();
+        }
+        return 0;
+    }
+
+    static BigMagic AddBigMagic(int value)
+    {
+        return new  ForzenBigMagic();
+    } 
+
+     abstract class BigMagic
+    {
+        protected Character owener;
+        protected Character enemy;
+        public int damageOnEnd;
+
+        public void SetOwner(Character owener,Character enemy)
+        {
+            this.owener = owener;
+            this.enemy = enemy;
+        }
+        public abstract int endTurn { get; set; }
+
+        internal abstract string Content();
+
+        internal void countTimeAction(RoundPeriod roundPeriod,int value)
+        {
+            damageOnEnd += value;
+            endTurn--;
+            countTimeAction(value);
+            if (endTurn<=0)
+            {
+                DoDamage();
+            }
+        }
+
+        public void DoDamage()
+        {
+            new Damage(damageOnEnd, true).Cast(owener,enemy);
+        }
+
+        protected abstract void countTimeAction(int value);
+        internal abstract string Title();
+    }
+
+    class ForzenBigMagic : BigMagic
+    {
+        public override int endTurn { get; set; } = 5;
+
+        protected override void countTimeAction(int value)
+        {
+            new Forzen(false, RoundPeriod.end, value).Cast(owener,enemy);
+        }
+
+        internal override string Content()
+        {
+            return "ForzenBigMagic";
+        }
+
+        internal override string Title()
+        {
+            return "ForzenBigMagicContent";
+        }
+    }
+    class FireBigMagic : BigMagic
+    {
+        public override int endTurn { get; set; } = 5;
+
+        protected override void countTimeAction(int value)
+        {
+            new DamageOnDrag(false, RoundPeriod.end, value).Cast(owener, enemy);
+        }
+
+        internal override string Content()
+        {
+            return "FireBigMagic";
+        }
+
+        internal override string Title()
+        {
+            return "FireBigMagicContent";
+        }
+    }
+    class AddMgicDamageBigMagic : BigMagic
+    {
+        public override int endTurn { get; set; } = 5;
+
+        protected override void countTimeAction(int value)
+        {
+            new AddMgicDamage(false, RoundPeriod.end, value).Cast(owener, enemy);
+        }
+
+        internal override string Content()
+        {
+            return "AddMgicDamageBigMagic";
+        }
+
+        internal override string Title()
+        {
+            return "AddMgicDamageBigMagicContent";
+        }
+    }
+
+
+
+}
+

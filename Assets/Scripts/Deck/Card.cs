@@ -1,12 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq.Expressions;
 using System.Runtime.Serialization;
 using System.Runtime.Serialization.Formatters.Binary;
-using UniRx;
-using UnityEditorInternal;
-using UnityEngine.UI;
 
 public static class CardFactory
 {
@@ -98,7 +94,7 @@ public class Card
             guid = Guid.NewGuid(),
             id = 1,
             type = Type.attack,
-            cost = 1,
+            cost = 5,
             cardAction = head
         };
         void setAction(IEffect effect)

@@ -14,22 +14,19 @@ public enum EffecID
     AddCard,
     RecoverEP,
     RemoveBuff,
+    InvokeBigMagiic,
     Rage,
     AddMgicDamage,
     Frozen,
     AddDamage,
+    AddDamageInOneGame,
     ChangeCard,
     Poison,
     DamageOnDrag,
     Bomb,
     CancelNextCard,
-    RubNextCard
-}
-public enum BuffID
-{
-    none,
-    Rage,
-    Forzen
+    RubNextCard,
+    BigMagic
 }
 
 public enum RoundPeriod

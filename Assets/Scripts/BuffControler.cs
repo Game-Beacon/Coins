@@ -5,8 +5,7 @@ class BuffControler
 {
     private Character user;
     private List<Buff> buffs = new List<Buff>();
-
-
+    BuffUIList buffUI;
     public int GetAttackValue(int attackValue,bool use)
     {
         int value = GetBuffInvokeValue(attackValue, EffecID.Rage, use);
@@ -22,6 +21,7 @@ class BuffControler
     public int GetMagicAttackValue(int attackValue, bool use)
     {
         int value= GetBuffInvokeValue(attackValue,EffecID.AddMgicDamage,use);
+        value = GetBuffInvokeValue(value, EffecID.Frozen, use);
         if (use)
         {
             RemoveBuff();
@@ -59,16 +59,22 @@ class BuffControler
             value = buffs[index].Invoke(value, use);
             if (use)
             {
-                ShowBuff(buffs[index]);
+                buffUI.Invoke(buffs[index]);
                 RemoveBuff();
             }
         }
+
         return value;
     }
 
     public BuffControler(Character user,Character enemy)
     {
         this.user = user;
+    }
+    public void SetBuffUI(BuffUIList buffUIList)
+    {
+        buffUI = buffUIList;
+        //buffUI = new DefaultBuffUI();
     }
     public void DoBuffTimeCount(RoundPeriod roundPeriod)
     {
@@ -81,7 +87,7 @@ class BuffControler
         var removeBuffs= buffs.FindAll(buff => buff.Remove);
         foreach (var item in removeBuffs)
         {
-            ShowRemoveBuff(item);
+            buffUI.RemoveBuff(item);
         }
         buffs = buffs.FindAll(buff => buff.Remove == false);
     }
@@ -92,23 +98,13 @@ class BuffControler
         if (index==-1 || !buffs[index].IsOverlay)
         {
             buffs.Add(buff);
-            ShowBuff(buff);
+            buffUI.AddBuff(buff);
         }
         else
         {
             buffs[index].Overlay(buff.Value);
-            ShowBuff(buffs[index]);
+            buffUI.AddBuff(buffs[index]);
         }
-    }
-    private void ShowRemoveBuff(Buff buff)
-    {
-        string value = buff.PositiveBuff ? "GoodBuff" : "BadBuff";
-        Tool.DeBug($"{user.name}:Remove{value}:{buff.GetTitle()}");
-    }
-    private void ShowBuff(Buff buff)
-    {
-        string value = buff.PositiveBuff ? "GoodBuff" : "BadBuff";
-        Tool.DeBug($"{user.name}:{value}:{buff.GetTitle()}{buff.GetContent()}");
     }
 
     internal void RemoveBuff(bool removeGoodBuff)
@@ -131,6 +127,52 @@ class BuffControler
             buffs[index].Remove = true;
             RemoveBuff();
         }
+    }
+
+    internal void InvokeBigMagiic()
+    {
+        var index = buffs.FindIndex((buff) => buff.ID == EffecID.BigMagic);
+        if (index != -1)
+        {
+            buffs[index].Invoke(0,true);
+            buffs[index].Remove = true;
+            RemoveBuff();
+        }
+    }
+}
+
+public interface BuffUIList
+{
+    void AddBuff(Buff buff);
+    void RenewBuff(Buff buff);
+    void Invoke(Buff buff);
+    void RemoveBuff(Buff buff);
+}
+public class DefaultBuffUI : BuffUIList
+{
+    public void AddBuff(Buff buff)
+    {
+        Debug(buff);
+    }
+
+    public void Invoke(Buff buff)
+    {
+        Debug(buff);
+    }
+
+    public void RemoveBuff(Buff buff)
+    {
+        Debug(buff);
+    }
+
+    public void RenewBuff(Buff buff)
+    {
+        Debug(buff);
+    }
+    void Debug(Buff buff)
+    {
+        string value = buff.PositiveBuff ? "GoodBuff" : "BadBuff";
+        Tool.DeBug($"{buff.owener.name}:{value}:{buff.GetTitle()}{buff.GetContent()}");
     }
 }
 

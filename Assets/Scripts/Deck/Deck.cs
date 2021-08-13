@@ -24,7 +24,6 @@ public class Deck
         if (id==-1)
         {
             var card = GetNextCard();
-            handCards.Add(card.guid, card);
             return card;
         }
         else
@@ -32,14 +31,21 @@ public class Deck
             throw new Exception();
         }
     }
-
+    bool test;
     private Card GetNextCard()
     {
         if (deckPool.Count == 0)
         {
             ReSetDeckPool();
         }
-        List<IEffect> buffs = new List<IEffect>() { new AddMgicDamage(true, RoundPeriod.end,5)};
+
+        List<IEffect> buffs = new List<IEffect>() {};
+        if (!test)
+        {
+            BigMagicContainer buffControler = new BigMagicContainer(true,RoundPeriod.end,1);
+            buffs.Add(buffControler);
+            test = true;
+        }
         //List<IEffect> buffs = new List<IEffect>() { new DamageOnDrag(true, RoundPeriod.end, 2),new Forzen(true,RoundPeriod.end, 2),new Bomb(true, RoundPeriod.end, 2) ,new RemoveBuff(false)};
         Card card = ChangeCard?.Invoke() ?? Card.TestCard(buffs);
         //Card card = ChangeCard?.Invoke() ?? deckPool.Dequeue();

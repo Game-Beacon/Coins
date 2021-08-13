@@ -10,6 +10,19 @@ using UnityEngine;
 
 public class Test : MonoBehaviour
 {
+    private void Start()
+    {
+        Debug.Log("yyyyy");
 
+    }
+    public void OnMouseEnter()
+    {
+        Debug.Log("OnMouseEnter");
+    }
+
+    public void OnMouseExit()
+    {
+        Debug.Log("OnMouseExit");
+    }
 }
 

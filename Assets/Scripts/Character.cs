@@ -44,7 +44,10 @@ public abstract class Character
     {
         buffControler = new BuffControler(this, enemy);
     }
-
+    public void SetBuffUI(BuffUIList  buffUIList)
+    {
+        buffControler.SetBuffUI(buffUIList);
+    }
     internal void AddBuff(Buff buff)
     {
         buffControler.Add(buff);
@@ -60,8 +63,16 @@ public abstract class Character
     }
     public void AddOneTurnHandCards()
     {
-        AddCards(DrawCountWhenYourTurn);
+        for (int i = 0; i < DrawCountWhenYourTurn; i++)
+        {
+            AddCards(-1);
+        }
     }
+    public void AddRandomCards(int value)
+    {
+
+    }
+
     public void AddCards(params int[] ids)
     {
         foreach (var id in ids)
@@ -98,8 +109,8 @@ public abstract class Character
     private void UseCard(Guid guid, Character target)
     {
         Card card = GetCard(guid);
+        BattleSystem.AddUsedCost(card.cost);
         SetEP(Ep - card.cost);
-
 
         if (DoSomethingToOther.Count!=0)
         {
@@ -190,7 +201,10 @@ public abstract class Character
         buffControler.DoBuffTimeCount(RoundPeriod.enemyStart);
     }
 
-    
+    internal void InvokeBigMagiic()
+    {
+        buffControler.InvokeBigMagiic();
+    }
 
     internal void StartTurn()
     {

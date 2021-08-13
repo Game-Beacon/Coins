@@ -36,7 +36,7 @@
 		<ID>5</ID>
 		<Attribute>talent</Attribute>
 		<Cost>1</Cost>
-		<Effect1>GetCard</Effect1>
+		<Effect1>AddCard</Effect1>
 		<Count1>1</Count1>
 	</Card>
 	<Card>

@@ -72,6 +72,7 @@ public static class BattleSystem
     {
         EndTurn();
         playerTurn = !playerTurn;
+        cost = 0;
         StartTurn();
     }
     private static void EndTurn()
@@ -83,5 +84,15 @@ public static class BattleSystem
     internal static void CountDamage(Character user, int value)
     {
         user.CountDamage(value);
+    }
+
+    internal static int GetUseMagic()
+    {
+        return cost;
+    }
+    static int cost;
+    internal static void AddUsedCost(int usedCost)
+    {
+        cost += usedCost;
     }
 }
